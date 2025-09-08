@@ -1,90 +1,98 @@
 - Python
   - John: Competent
   - David: Competent
-  - Senih:
+  - Senih: Competent
 - Java
   - John: Competent
   - David: Competent
-  - Senih:
+  - Senih: Novice
 - JS/TS
   - John: Competent
   - David: Novice
-  - Senih:
+  - Senih: Novice
 - Rust
   - John: Novice
   - David: None
-  - Senih:
+  - Senih: None
 - C/C++
   - John: Proficient
   - David: Competent
-  - Senih:
+  - Senih: Proficient 
 - SQL
   - John: Novice
   - David: Novice
-  - Senih:
+  - Senih: Competent
 - HTML/CSS
   - John: Novice
   - David: Novice
-  - Senih:
+  - Senih: Competenet
 - Bash
   - John: Competent
   - David: None
-  - Senih:
+  - Senih: Proficient
 - Git
   - John: Proficient
   - David: Novice
-  - Senih:
+  - Senih: Proficient
 - Agile
   - John: Proficient
   - David: None
-  - Senih:
+  - Senih: None
 - Docker
   - John: Novice
   - David: Novice 
-  - Senih:
+  - Senih: Proficient
 - Node
   - John: Novice
   - David: Competent
-  - Senih:
+  - Senih: Proficient
 - Networks
   - John: Competent
   - David: Novice
-  - Senih:
+  - Senih: Proficient
 - Linux/Command Line
   - John: Proficient
   - David: Competent
-  - Senih:
+  - Senih: Proficient
 - Angular
   - John: None
   - David: None
-  - Senih:
+  - Senih: None
 - Svelte
   - John: Novice 
   - David: None
-  - Senih:
+  - Senih: None
 - Ruby
   - John: None
   - David: Novice
-  - Senih:
+  - Senih: None
 - Swift
   - John: None
   - David: None
-  - Senih:
+  - Senih: Proficient
 - Objective C
   - John: None
   - David: None
-  - Senih:
+  - Senih: Novice
 - C#
   - John: None
   - David: None
-  - Senih:
+  - Senih: None
 - NoSQL
   - John: None
   - David: None
-  - Senih:
+  - Senih: None
 - AWS
   - John: Novice
   - David: None
-  - Senih:
+  - Senih: Proficient
+- Apache
+  - John: 
+  - David: 
+  - Senih: Proficient
+- Nginx
+  - John: 
+  - David: 
+  - Senih: None
 
 Add more if needed
