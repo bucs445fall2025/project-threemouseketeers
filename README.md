@@ -1,9 +1,11 @@
 # << Project Title >>
 ## CS 445 Final Project
-### << Semester, Year >>
+### Fall 2025
 
-### Team: << team name >>
-<< List Team Members >>
+### Team: 1
+- John Birchwood
+- David Krein
+- Senih Okuyucu
 
 ## Getting Started
 <<One paragraph of project description goes here>>
