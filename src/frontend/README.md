@@ -105,3 +105,11 @@ Then, from within your project folder:
 npm run build
 surge public my-project.surge.sh
 ```
+
+Since it is bundled into public, you can run locally by running 
+
+```bash
+serve public/
+```
+
+And you should be able to see the bundled frontend on localhost.
