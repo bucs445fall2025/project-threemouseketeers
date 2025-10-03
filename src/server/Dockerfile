@@ -1,9 +1,6 @@
 FROM mysql:8.0
 
-ENV MYSQL_ROOT_PASSWORD=rootpassword
-ENV MYSQL_DATABASE=projectdb
-ENV MYSQL_USER=user
-ENV MYSQL_PASSWORD=password
+#env variables have been moved to .env file for security reasons
 
 # Copy schema + seed data into MySQL init directory
 COPY init.sql /docker-entrypoint-initdb.d/
