@@ -6,9 +6,12 @@
 
 ## Requirements Attempted in next Sprint
 
+- Storage
+  - Database working
+  - Schemas defined
 
 ## Milestone Status (Pass/Fail)
-
+Pass
 
 ## Requested Changes
 
