@@ -1,3 +1,7 @@
 # TODO: Add things we want to ignore for our stack 
 
 *.DS_Store*
+
+#secret env variables 
+secrets.txt
+.env
