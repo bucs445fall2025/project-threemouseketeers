@@ -12,6 +12,7 @@ fi
 
 MYSQL_HOST="127.0.0.1"
 MYSQL_PORT="3306"
+TABLE_NAME="users"
 
 # === VERIFY REQUIRED VARIABLES ===
 : "${MYSQL_USER:?Missing MYSQL_USER in .env}"
@@ -59,14 +60,14 @@ fi
 # === TEST 5: Create a User ===
 echo "[5] Creating user"
 if ! mysql -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D"$MYSQL_DATABASE" -e \
-"INSERT INTO users (username, email, password_hash)
+"INSERT INTO $TABLE_NAME (username, email, password_hash)
  VALUES ('johndoe', 'johndoe@example.com', '67hashvalue');" &>/dev/null; then 
   echo "Could not create user"
   exit 1
 else
   echo "successfully created user"
-  if ! mysql -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D"$MYSQL_DATABASE" -e \
-"SELECT * FROM users WHERE username='johndoe';" &>/dev/null; then
+  COUNT=$(mysql -Nse "SELECT COUNT(*) FROM $TABLE_NAME WHERE username='johndoe';")
+  if [[ "$COUNT" -ne 1 ]]; then
     echo "Could not find user" 
     exit 1
   else 
@@ -74,7 +75,19 @@ else
   fi
 fi
 
-# TODO: Try to create a repeat user and confirm it does not work
+# === TEST 5: Create a User ===
+echo "[5] Creating user"
+if ! mysql -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D"$MYSQL_DATABASE" -e \
+"INSERT INTO $TABLE_NAME (username, email, password_hash)
+ VALUES ('johndoe', 'test123@yahoo.com', 'skibidi');" &>/dev/null; then 
+  echo "Confirmed that repeat usernames cannot be used"
+else
+  echo "allowed repeat usernames"
+  exit 1
+fi
+
+# TODO: Figure out password format and create a test for it
+
 
 echo "All MySQL tests passed successfully."
 exit 0
