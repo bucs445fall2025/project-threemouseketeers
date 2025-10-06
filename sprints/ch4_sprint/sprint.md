@@ -1,7 +1,5 @@
 # Sprint Meeting Notes
 
-*note: replace anything surrounded by << >> and **remove** the << >>*
-
 **Attended**: John Birchwood, David Krein, Senih Okuyucu
 
 **DATE**: 6 October 2025
@@ -16,27 +14,29 @@ Requirements
 
 ### User Story
 
-<< Corresponding User Stories completed in this sprint >>
+Account Creation
 
 ### Sprint Requirements Attempted
 
-<< The corresponding SRS requirement that the team completed in the last sprint >>
+Account Creation
 
 ### Completed Requirements
 
-<< The work that's been completed in this sprint >>
+Schemas defined
+Database working
 
 ### Incomplete Requirements
 
-<< The work that has not been completed in this sprint. Be VERY detailed and specific regarding what isn't working and what needs to be completed >>
+Password authentication still needs to be implemented
 
 ### The summary of the entire project
 
-<< A general overview of the entire project >>
+Project is still in early stages, with basic operations for MySQL database functional.
+Backend for student account creation and login are next priorities.
 
 ***
 
-## Sprint << num >> Planning
+## Sprint 2 Planning
 
 ## Requirements Flex
 
@@ -44,28 +44,32 @@ Requirements
 
 ## Technical Debt
 
-<< Any requirements from the previous sprint that are using a technical flex >>
+
 
 ### Requirement Target
 
-<< The corresponding SRS requirement that our team will be complete in next sprint >>
+Password Authentcation
 
 ### User Stories
 
-<< Corresponding User Stories >>
+User Authentication
 
 ### Planning
 
-<< Our team's detailed plan to complete the sprint >>
+We will work on our tasks and meet on Friday to review progress and issues.
 
 ### Action Items
 
-<< A list of things that need to happen in our for our team to complete the sprint >>
+-Implement student account creation with password storage
+-Implement student account "login" with password authentication
 
 ### Issues and Risks
 
-<< A list of potential obstacles that could keep us from completing the sprint and what's being done about them >>
+We could run out of time before the next sprint.
+Solution: We will meet on Friday and if anything is not done we will discuss possible solutions to work on over the weekend.
 
 ### Team Work Assignments
 
-<< A list of each team member and their works assignments for this sprint >>
+John: Implement a test script to confirm user creation and login are functional
+David: Implement student account "login" with password authentication
+Senih: Implement student account creation with password storage
