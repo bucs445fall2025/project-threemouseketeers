@@ -66,7 +66,8 @@ if ! mysql -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D"$MYSQL_DATABAS
   exit 1
 else
   echo "successfully created user"
-  COUNT=$(mysql -Nse "SELECT COUNT(*) FROM $TABLE_NAME WHERE username='johndoe';")
+  COUNT=$(mysql -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D"$MYSQL_DATABASE" \
+  -Nse "SELECT COUNT(*) FROM $TABLE_NAME WHERE username='johndoe';")
   if [[ "$COUNT" -ne 1 ]]; then
     echo "Could not find user" 
     exit 1
@@ -75,8 +76,8 @@ else
   fi
 fi
 
-# === TEST 5: Create a User ===
-echo "[5] Creating user"
+# === TEST 6: Try to Create a Duplicate User ===
+echo "[6] Creating duplicate user"
 if ! mysql -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D"$MYSQL_DATABASE" -e \
 "INSERT INTO $TABLE_NAME (username, email, password_hash)
  VALUES ('johndoe', 'test123@yahoo.com', 'skibidi');" &>/dev/null; then 
