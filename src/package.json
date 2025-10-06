@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "page": "^1.11.6",
+    "svelte-spa-router": "^4.0.1"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "^3.0.10"
+  }
+}

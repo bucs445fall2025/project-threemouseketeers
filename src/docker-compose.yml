@@ -10,3 +10,8 @@ services:
     ports:
       - "3306:3306"
     restart: always
+
+  frontend:
+    build: ./frontend-2
+    ports: 
+      - "3000:80"
