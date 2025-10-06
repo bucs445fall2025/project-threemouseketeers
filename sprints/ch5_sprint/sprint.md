@@ -2,17 +2,17 @@
 
 *note: replace anything surrounded by << >> and **remove** the << >>*
 
-**Attended**: << record the team members in attendance (virtual counts as long as they are participating) >>
+**Attended**: John Birchwood, David Krein, Senih Okuyucu
 
-**DATE**: << meeting date >>
+**DATE**: 13 October 2025
 
 ***
 
-## Sprint << num >> Review
+## Sprint 2 Review
 
 ### SRS Sections Updated
 
-<< List any SRS sections that were updated in the last sprint >>
+Software Architecture Diagram
 
 ### User Story
 
@@ -36,11 +36,11 @@
 
 ***
 
-## Sprint << num >> Planning
+## Sprint 3 Planning
 
 ## Requirements Flex
 
-<< # >>/5 requirement flexes remaining
+<< # >>/3 requirement flexes remaining
 
 ## Technical Debt
 
