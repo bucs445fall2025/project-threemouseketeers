@@ -15,3 +15,10 @@ services:
     build: ./frontend-2
     ports: 
       - "3000:80"
+
+  adminer: #the adminer service is jsut a GUI representation of our database. note the depends-on flag, it will not start until the database has started
+    image: adminer:latest
+    ports:
+      - "3001:8080"
+    depends_on: 
+      - db
