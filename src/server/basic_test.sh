@@ -32,7 +32,7 @@ fi
 
 # === TEST 2: Authentication ===
 echo "[2] Testing authentication..."
-if ! mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "SELECT 1;" ; then
+if ! mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "SELECT 1;" &>/dev/null; then
   echo "Authentication failed for user '$MYSQL_USER'"
   exit 1
 else
@@ -81,7 +81,8 @@ fi
 echo "[6] Creating duplicate user"
 if ! mysql -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D"$MYSQL_DATABASE" -e \
 "INSERT INTO $TABLE_NAME (username, email, password_hash)
- VALUES ('johndoe', 'test123@yahoo.com', 'skibidi');" &>/dev/null; then 
+ VALUES ('johndoe', 'test123@yahoo.com', 'skibidi');
+ DELETE FROM `users` WHERE ((`id` = '1'));" &>/dev/null; then 
   echo "Confirmed that repeat usernames cannot be used"
 else
   echo "allowed repeat usernames"

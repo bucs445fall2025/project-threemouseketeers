@@ -18,18 +18,21 @@ services:
 
 
   frontend:
+    container_name: frontend
     build: ./frontend-2
     ports: 
       - "3000:80"
 
   adminer: #the adminer service is jsut a GUI representation of our database. note the depends-on flag, it will not start until the database has started
-    image: adminer:latest
+    container_name: adminer
+    image: dockette/adminer:mysql
     ports:
-      - "3001:8080"
+      - "3001:80"
     depends_on: 
       - db
 
   tests:
+    container_name: db_test
     image: mysql:latest
     depends_on:
       db:
