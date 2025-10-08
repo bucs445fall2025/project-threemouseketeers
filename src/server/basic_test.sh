@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# === LOAD ENVIRONMENT VARIABLES ===
-if [[ -f "../.env" ]]; then
-  # Export all variables from .env
-  export $(grep -v '^#' ../.env | xargs)
-else
-  echo ".env file not found."
-  exit 1
-fi
+# === LOAD ENVIRONMENT VARIABLES === THIS IS NOW HANDLED IN THE COMPOSE FILE
+# if [[ -f "./.env" ]]; then
+#   # Export all variables from .env
+#   export $(grep -v '^#' ../.env | xargs)
+# else
+#   echo ".env file not found."
+#   exit 1
+# fi
 
-MYSQL_HOST="127.0.0.1"
-MYSQL_PORT="3306"
+MYSQL_HOST="${DB_HOST:-db}"
+MYSQL_HOST="db"
+MYSQL_PORT="${DB_PORT:-3306}"
 TABLE_NAME="users"
 
 # === VERIFY REQUIRED VARIABLES ===
@@ -31,7 +32,7 @@ fi
 
 # === TEST 2: Authentication ===
 echo "[2] Testing authentication..."
-if ! mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "SELECT 1;" &>/dev/null; then
+if ! mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -e "SELECT 1;" ; then
   echo "Authentication failed for user '$MYSQL_USER'"
   exit 1
 else
@@ -59,9 +60,9 @@ fi
 
 # === TEST 5: Create a User ===
 echo "[5] Creating user"
-if ! mysql -h"$MYSQL_HOST" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D"$MYSQL_DATABASE" -e \
+if ! mysql -h"$MYSQL_HOST" -P"$MYSQL_PORT" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D"$MYSQL_DATABASE" -e \
 "INSERT INTO $TABLE_NAME (username, email, password_hash)
- VALUES ('johndoe', 'johndoe@example.com', '67hashvalue');" &>/dev/null; then 
+ VALUES ('johndoe', 'johndoe@example.com', '67hashvalue');" ; then 
   echo "Could not create user"
   exit 1
 else
