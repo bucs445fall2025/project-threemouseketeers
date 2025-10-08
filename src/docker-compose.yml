@@ -1,6 +1,8 @@
 services:
   db:
-    build: ./server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
     container_name: mysql_db
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -16,13 +18,21 @@ services:
       timeout: 3s
       retries: 10
 
-
   frontend:
-    build: ./frontend-2
-    ports: 
-      - "3000:80"
+    build:
+      context: ./frontend-2
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "5173:5173"  # SvelteKit dev server port
+    # volumes:
+    #   - .:/app               # Mount local code for live reload
+    #   - /app/node_modules    # Keep installed deps
+    environment:
+      - NODE_ENV=development
+    command: npm run dev -- --host
 
-  adminer: #the adminer service is jsut a GUI representation of our database. note the depends-on flag, it will not start until the database has started
+    adminer: #the adminer service is jsut a GUI representation of our database. note the depends-on flag, it will not start until the database has started
     image: adminer:latest
     ports:
       - "3001:8080"
@@ -47,4 +57,3 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     command: ["bash", "./server/basic_test.sh"]
-
