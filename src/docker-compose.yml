@@ -32,6 +32,24 @@ services:
       - NODE_ENV=development
     command: npm run dev -- --host
 
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: api
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
   adminer: #the adminer service is jsut a GUI representation of our database. note the depends-on flag, it will not start until the database has started
     container_name: adminer
     image: dockette/adminer:mysql

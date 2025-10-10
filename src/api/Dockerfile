@@ -1,20 +1,14 @@
-
-
-FROM node:latest-ubuntu
+FROM node:24
 
 # This can be changed later
-WORKDIR /var/app
+WORKDIR /api
 
-COPY requirements.txt /var/app/.
+COPY ./package.json ./package.json
+RUN npm install
 
-RUN "<install cmd goes here>" 
-# ^^ "npm install "
-
-COPY . /var/app/.
+COPY . /api/.
 
 EXPOSE 8080
 
-CMD "<run cmd goes here>"
-
-
-## stack is node, svelte, mysql, and caddy if we need a webserver, will set up docker compose as well.
+CMD ["node", "password_storage.js"]
+#CMD ["node", "create_user.js"]

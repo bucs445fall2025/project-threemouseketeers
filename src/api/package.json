@@ -1,0 +1,17 @@
+{
+  "name": "create-user",
+  "version": "1.0.0",
+  "description": "Store username/email/password combo",
+  "main": "password_storage.js",
+  "scripts": {
+    "start": "node password_storage.js"
+  },
+  "dependencies": {
+    "dotenv": "17.2.3",
+    "mysql2": "3.15.2",
+    "express": "5.1.0",
+    "passport": "0.7.0",
+    "bcrypt": "6.0.0"
+  },
+  "license": "MIT"
+}
