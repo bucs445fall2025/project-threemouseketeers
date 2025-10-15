@@ -10,5 +10,5 @@ COPY . /api/.
 
 EXPOSE 8080
 
-CMD ["node", "password_storage.js"]
+CMD ["node", "api.js"]
 #CMD ["node", "create_user.js"]

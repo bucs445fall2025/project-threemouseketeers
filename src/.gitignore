@@ -7,3 +7,6 @@ secrets.txt
 .env
 
 node_modules
+
+#VSCODE
+.vscode
