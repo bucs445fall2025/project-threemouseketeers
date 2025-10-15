@@ -16,23 +16,27 @@ Software Architecture Diagram
 
 ### User Story
 
-<< Corresponding User Stories completed in this sprint >>
+- Account Creation  
+- User Authentication  
 
 ### Sprint Requirements Attempted
 
-<< The corresponding SRS requirement that the team completed in the last sprint >>
+- Account Creation  
+- Password Authentication  
 
 ### Completed Requirements
 
-<< The work that's been completed in this sprint >>
+- Account Creation  
+- Password Authentication  
 
 ### Incomplete Requirements
 
-<< The work that has not been completed in this sprint. Be VERY detailed and specific regarding what isn't working and what needs to be completed >>
 
 ### The summary of the entire project
 
-<< A general overview of the entire project >>
+- MySQL database is functional  
+- Basic API functionality for user creation and verification is implemented  
+- User creation/verification interface is not yet implemented.
 
 ***
 
@@ -40,32 +44,40 @@ Software Architecture Diagram
 
 ## Requirements Flex
 
-<< # >>/3 requirement flexes remaining
+3/3 requirement flexes remaining
 
 ## Technical Debt
 
-<< Any requirements from the previous sprint that are using a technical flex >>
 
 ### Requirement Target
 
-<< The corresponding SRS requirement that our team will be complete in next sprint >>
+- Login Interface
 
 ### User Stories
 
-<< Corresponding User Stories >>
+- Account Creation  
+- User Verification  
 
 ### Planning
 
-<< Our team's detailed plan to complete the sprint >>
+Work on each of our assignments and meet on Friday to discuss.  
 
 ### Action Items
 
-<< A list of things that need to happen in our for our team to complete the sprint >>
+- Create front end for the interface  
+- Update API to allow communication with front end  
+- Test functionality of interface  
 
 ### Issues and Risks
 
-<< A list of potential obstacles that could keep us from completing the sprint and what's being done about them >>
+Issue: We could run out of time before the next sprint.  
+Solution: We will meet on Friday and if anything is not done we will discuss possible solutions to work on over the weekend.  
+  
+Issue: Conflicts could arise that prevent our meeting on Friday.  
+Solution: We will meet over the weekend if we can't get together during class time on Friday.  
 
 ### Team Work Assignments
 
-<< A list of each team member and their works assignments for this sprint >>
+John: Create front end for the interface  
+David: Update API to allow communication with front end  
+Senih: Test functionality of interface  

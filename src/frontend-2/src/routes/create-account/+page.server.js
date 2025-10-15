@@ -17,8 +17,7 @@ export const actions = {
     if (!email || !password) {
       return fail(400, { email, password, missing: true })
     }
-
-    // TODO: API call goes here
+    
     console.log("Creating ", email, ", ", password);
     try {
       console.log('calling api/signup')
