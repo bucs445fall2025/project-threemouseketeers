@@ -2,6 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const { createUser, usernameTaken, verifyUser, dbPing } = require('./password_storage.js');
+const { addQuestion, vote, answerQuestion, topQuestions } = require('./questions.js');
 
 const app = express();
 app.use(express.json());
