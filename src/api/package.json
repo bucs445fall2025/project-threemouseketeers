@@ -4,7 +4,7 @@
   "description": "Store username/email/password combo",
   "main": "password_storage.js",
   "scripts": {
-    "start": "node password_storage.js"
+    "start": "node api.js"
   },
   "dependencies": {
     "bcrypt": "6.0.0",
