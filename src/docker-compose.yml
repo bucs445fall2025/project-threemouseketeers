@@ -14,6 +14,7 @@ services:
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      start_period: 5s
       interval: 5s
       timeout: 3s
       retries: 10

@@ -8,13 +8,14 @@ const API_KEY = '';
 
 export const actions = {
   logIn: async ({ request, fetch }) => {
-    console.log('sign up requested');
-    const formData = await request.formData()
+    console.log('log in requested');
+    const formData = await request.formData();
 
-    const email = String(formData.get('email'))
-    const password = String(formData.get('password'))
+    const email = String(formData.get('email'));
+    const password = String(formData.get('password'));
 
     if (!email || !password) {
+      console.log('email or password missing');
       return fail(400, { email, password, missing: true })
     }
     
@@ -27,12 +28,16 @@ export const actions = {
           'content-type': 'application/json'},
         body: JSON.stringify({ email, password})
         });
-
+        console.log(res.ok);
+        console.log(res.status);
+        console.log("res = ", res);
+        
         const data = await res.json().catch(() => ({}));
+        // data.json()
         if(!res.ok) {
           return fail(res.status, {email, apiError: data.error || 'Log-in failed.'});
         }
-
+        console.log('login succeeded');
         return {success: true, userId: data.id};
     } catch(err){
       return fail(500, {email, apiError: err?.message || 'Server error'});

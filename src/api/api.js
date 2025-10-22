@@ -1,7 +1,7 @@
 // src/api/api.js
 require('dotenv').config();
 const express = require('express');
-const { createUser, usernameTaken, verifyUser, dbPing } = require('./password_storage.js');
+const { createUser, usernameTaken, verifyUser, dbPing, hashWord } = require('./password_storage.js');
 const { addQuestion, vote, answerQuestion, topQuestions } = require('./questions.js');
 
 const app = express();
@@ -28,28 +28,32 @@ app.get('/health', async (_req, res) => {
 });
 
 // create user
-app.post('/api/signup', async (req, res) => {
+app.post('/api/signup', async (req, res) => { 
   console.log('account create requested');
   try {
     const { username, email, password } = req.body || {};
     if (!email || !password) {
-      return res.status(400).json({ error: 'username, email, password required' });
+      console.log('email or password missing');
+      return res.status(e.status || 400).json({ error: 'username, email, password required' });
     }
     const result = await createUser({ username, email, password });
+    console.log('login succesful');
     res.status(201).json(result);
   } catch (e) {
-    res.status(e.status || 500).json({ error: e.message || 'Internal error' });
+    console.log('account create failed');
+    return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
   }
 });
 
 // login (optional)
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', async (req, res) => { //login is currently demanding username instead of email
+  console.log('login requested')
   try {
-    const { username, password } = req.body || {};
-    if (!username || !password) {
-      return res.status(400).json({ error: 'username and password required' });
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ error: 'email and password required' });
     }
-    const ok = await verifyUser({ username, password });
+    const ok = await verifyUser({ username, email, password });
     return ok ? res.json({ ok: true }) : res.status(401).json({ ok: false, error: 'Invalid credentials' });
   } catch (e) {
     res.status(500).json({ error: 'Internal error' });
