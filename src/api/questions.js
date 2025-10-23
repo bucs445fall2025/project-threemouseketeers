@@ -36,7 +36,7 @@ async function addQuestion(newQuestion, username) {
 
 async function vote(questionId) {
 	//ensure questionId exists in questions table
-	const [rows] = await pool.exectue(
+	const [rows] = await pool.execute(
 		'SELECT question FROM questions WHERE id = ?',
 		[questionId]
 	);
@@ -55,7 +55,7 @@ async function vote(questionId) {
 	return true;
 }
 
-async function answerQuestion(questionId, answer) {
+async function answerQuestion(questionId, newAnswer, username) {
 	//ensure questionId exists in questions table
 	const [rows] = await pool.execute(
 		'SELECT question FROM questions WHERE id = ?',
@@ -67,11 +67,16 @@ async function answerQuestion(questionId, answer) {
 		throw err;
 	}
 	
-	//replaces previous answer if it exists
 	const [results] = await pool.execute(
-		'UPDATE questions SET answer = ? WHERE id = ?',
-		[answer, questionId]
-	);
+		'INSERT INTO answers (question_id, answer, username) VALUES (?, ?, ?)',
+		[questionId, newAnswer, username]
+	)
+	
+	//increment num_answers
+	const [update] = await pool.execute(
+		'UPDATE questions SET num_answer = ? WHERE id = ?',
+		[num_answer + 1, questionId]
+	)
 	
 	return true;
 }
@@ -87,7 +92,7 @@ async function topQuestions(numRows, minVotes) {
 		numRows = count[0].questionsCount;
 	}
 	
-	const [results] = await pool.exectue(
+	const [results] = await pool.execute(
 		'SELECT * FROM questions ORDER BY votes DESC LIMIT ?',
 		[numRows]
 	);
