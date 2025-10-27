@@ -63,7 +63,7 @@ async function createUser({username, email, password}) {
 
 	//hash the password and insert into users table
 	// const hash = await bcrypt.hash(password, Number(saltRounds));
-	const hash = await hashWord(password);
+	const hash = await hashWord(password); // hashword returns a promise, need to await it
 	const [result] = await pool.execute(
 	    'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
     	[username, email, hash]
