@@ -1,20 +1,26 @@
 // src/api/api.js
 require('dotenv').config();
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
+// const jwt = require('jsonwebtoken');
+// const bodyParser = require('body-parser');
+// const cookieParser = require('cookie-parser');
 const { createUser, usernameTaken, verifyUser, dbPing, hashWord } = require('./password_storage.js');
 const { addQuestion, vote, answerQuestion, topQuestions } = require('./questions.js');
+const { sessionMiddleware, requireAuth, getSessionUser, setSessionUser, destroySession} = require('./session.js');
+// const { use } = require('passport');
+
 
 const app = express();
 app.use(express.json());
-app.use(bodyParser.json());
-app.use(cookieParser());
+// app.use(cookieParser());
+app.use(sessionMiddleware());
+
+
 
 const PORT = Number(process.env.PORT || 8080);
 const API_KEY = process.env.API_KEY || null;
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret'; // TODO: Fix these
+
 
 // optional: simple API key gate
 app.use((req, res, next) => {
@@ -64,11 +70,21 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ ok: false, error: 'Invalid credentials' });
     }
 
-    // jwt token generation
-    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1d' });
+    // // jwt token generation
+    // const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1d' });
+
+    //create/rotate server session from express-mysql-backend
+    req.session.regenerate(err => {
+      if(err) {
+        console.error('session regen failed', err);
+        return res.status(500).json({ error : 'Session error, whoops'});
+      }
+    });
+    //store non-private user session info (email)
+    setSessionUser(req, {email});
 
     console.log("login successful");
-    return res.json({ ok: true, token });
+    return res.json({ ok: true });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Internal error, whoops' });
@@ -87,6 +103,26 @@ app.post('/api/login', async (req, res) => {
 //     res.status(401).json({ error: 'Invalid token' });
 //   }
 // });
+app.get('/api/me', (req, res) => {
+  const user = getSessionUser(req);
+  if(!user){
+    return res.status(401).json({ error: 'Not logged in' })
+  };
+    res.json({ ok:true, user});
+});
+
+app.post('/api/logout', async (req, res) => {
+  await destroySession(req);
+
+  res.clearCookie(process.env.SESSION_COOKIE_NAME || 'sid');
+  res.json({ ok: true});
+});
+
+app.get('/api/private/data', requireAuth,(req, res) => {
+  const user = getSessionUser(req);
+  res.json({ message: `welcome, ${user.username || 'user'}!`, user: getSessionUser(req)});
+});
+
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Bridge listening on :${PORT}`);

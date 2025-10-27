@@ -16,10 +16,11 @@ export const actions = {
       return fail(400, { missing: true });
     }
 
-    const res = await fetch('http://api:8080/api/login', {
+    const res = await fetch(`${API_BASE}/api/login`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
+      credentials: 'include'
     });
 
     if (!res.ok) {
@@ -28,13 +29,13 @@ export const actions = {
     }
 
     const data = await res.json().catch(() => ({}));
-    cookies.set('jwt', data.token, {
-      path: '/',
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: false,  // true in production with HTTPS
-      maxAge: 60 * 60 * 24 // 1 day
-    });
+    // cookies.set('jwt', data.token, {
+    //   path: '/',
+    //   httpOnly: true,
+    //   sameSite: 'lax',
+    //   secure: false,  // true in production with HTTPS
+    //   maxAge: 60 * 60 * 24 // 1 day
+    // });
 
     return { success: true };
   }

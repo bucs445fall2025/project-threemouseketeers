@@ -53,6 +53,8 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME}
 
   adminer: #the adminer service is jsut a GUI representation of our database. note the depends-on flag, it will not start until the database has started
     container_name: adminer
