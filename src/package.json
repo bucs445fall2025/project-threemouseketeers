@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "jsonwebtoken": "^9.0.2",
     "page": "^1.11.6",
     "svelte-spa-router": "^4.0.1",
     "unique-username-generator": "^1.5.1"

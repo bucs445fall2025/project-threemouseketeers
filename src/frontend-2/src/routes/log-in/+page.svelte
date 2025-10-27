@@ -1,38 +1,19 @@
 <script>
-	let message = '';
-	let color = '';
-	
-	async function handleSubmit(event) {
-		event.preventDefault();
-		const formData = new FormData(event.target);
-
-		const res = await fetch('?/logIn', {
-			method: 'POST',
-			body: formData
-		});
-
-		if (res.status === 200) {
-			message = 'Signed In!';
-			color = 'green';
-		} else if (res.status === 400) {
-			message = 'Please fill in all fields.';
-			color = 'red';
-    }
-    else if (res.status === 500) {
-      message = `ERROR: ${res.status}` 
-		} else {
-			message = `Unexpected response (${res.status})`;
-			color = 'orange';
-		}
-	}
+  export let form = {};
 </script>
 
-<form on:submit={handleSubmit}>
-	<input type="text" name="email" placeholder="Email" />
-	<input type="password" name="password" placeholder="Password" />
-	<button type="submit">Log In</button>
-</form>
+<form method="POST" action="?/logIn">
+  <input name="email" type="email" />
+  <input name="password" type="password" />
+  <button type="submit">Log In</button>
 
-{#if message}
-<p style="color:{color}">{message}</p>
-{/if}
+  {#if form?.missing}
+    <p style="color:red">Please fill in all fields.</p>
+  {/if}
+  {#if form?.apiError}
+    <p style="color:red">{form.apiError}</p>
+  {/if}
+  {#if form?.success}
+    <p style="color:green">Signed in!</p>
+  {/if}
+</form>

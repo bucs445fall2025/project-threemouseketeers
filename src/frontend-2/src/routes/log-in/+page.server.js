@@ -7,41 +7,35 @@ const API_BASE = 'http://api:8080';
 const API_KEY = '';
 
 export const actions = {
-  logIn: async ({ request, fetch }) => {
-    console.log('log in requested');
+  logIn: async ({ request, cookies }) => {
     const formData = await request.formData();
-
-    const email = String(formData.get('email'));
-    const password = String(formData.get('password'));
+    const email = formData.get('email');
+    const password = formData.get('password');
 
     if (!email || !password) {
-      console.log('email or password missing');
-      return fail(400, { email, password, missing: true })
+      return fail(400, { missing: true });
     }
-    
-    console.log("Logging in ", email, ", ", password);
-    try {
-      console.log('calling api/login')
-      const res = await fetch('http://api:8080/api/login', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json'},
-        body: JSON.stringify({ email, password})
-        });
-        console.log(res.ok);
-        console.log(res.status);
-        console.log("res = ", res);
-        
-        const data = await res.json().catch(() => ({}));
-        // data.json()
-        if(!res.ok) {
-          return fail(res.status, {email, apiError: data.error || 'Log-in failed.'});
-        }
-        console.log('login succeeded');
-        return {success: true, userId: data.id};
-    } catch(err){
-      return fail(500, {email, apiError: err?.message || 'Server error'});
+
+    const res = await fetch('http://api:8080/api/login', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return fail(res.status, { apiError: data.error });
     }
+
+    const data = await res.json().catch(() => ({}));
+    cookies.set('jwt', data.token, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,  // true in production with HTTPS
+      maxAge: 60 * 60 * 24 // 1 day
+    });
+
+    return { success: true };
   }
-  // more actions can go here -- e.g. forgot password?
-}
+};

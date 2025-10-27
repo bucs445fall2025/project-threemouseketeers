@@ -11,31 +11,32 @@ export const actions = {
     console.log('sign up requested');
     const formData = await request.formData()
 
+    const username = String(formData.get('username'))
     const email = String(formData.get('email'))
     const password = String(formData.get('password'))
 
-    if (!email || !password) {
-      return fail(400, { email, password, missing: true })
+    if ( !username || !email || !password) {
+      return fail(400, { username, email, password, missing: true })
     }
     
-    console.log("Creating ", email, ", ", password);
+    console.log("Creating ", username, ", ", email, ", ", password);
     try {
       console.log('calling api/signup')
       const res = await fetch('http://api:8080/api/signup', {
         method: 'POST',
         headers: {
           'content-type': 'application/json'},
-        body: JSON.stringify({ email, password})
+        body: JSON.stringify({ username, email, password})
         });
 
         const data = await res.json().catch(() => ({}));
         if(!res.ok) {
-          return fail(res.status, {email, apiError: data.error || 'Sign-up failed.'});
+          return fail(res.status, {email, apiError: data.error || 'Sign-up failed, whoops'});
         }
 
         return {success: true, userId: data.id};
     } catch(err){
-      return fail(500, {email, apiError: err?.message || 'Server error'});
+      return fail(500, {email, apiError: err?.message || 'Server error, whoops'});
     }
   }
   // more actions can go here -- e.g. forgot password?

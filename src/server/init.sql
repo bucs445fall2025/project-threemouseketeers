@@ -11,16 +11,16 @@ CREATE TABLE IF NOT EXISTS questions (
 	question VARCHAR(255) NOT NULL,
 	username VARCHAR(50) NOT NULL,
 	votes INT DEFAULT 0,
-	num_answers int DEFAULT 0,
-	accepted_answer_id int DEFAULT NULL
+	num_answers INT DEFAULT 0,
+	accepted_answer_id INT DEFAULT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS answers (
 	id INT AUTO_INCREMENT PRIMARY KEY,
-	question_id int NOT NULL,
+	question_id INT NOT NULL,
 	answer VARCHAR(255) NOT NULL,
 	username VARCHAR(50) NOT NULL,
 	votes INT DEFAULT 0,
-	accepted_answer BOOLEAN DEFAULT False
+	accepted_answer BOOLEAN DEFAULT FALSE
 );

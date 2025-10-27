@@ -63,7 +63,7 @@ async function createUser({username, email, password}) {
 
 	//hash the password and insert into users table
 	// const hash = await bcrypt.hash(password, Number(saltRounds));
-	const hash = hashWord(password);
+	const hash = await hashWord(password);
 	const [result] = await pool.execute(
 	    'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
     	[username, email, hash]
@@ -73,22 +73,18 @@ async function createUser({username, email, password}) {
 
 }
 	
-async function verifyUser({username, email, password}) {
-	//Verify username and password are stored correctly
-	if(!username){
-		const [result] = await pool.execute(
-			'SELECT username FROM users WHERE email = ?',
-			[email]
-		);
-		username = result.username;
-	}
+async function verifyUser({ email, password }) {
+  if (!email || !password) return false;
 
-	const [rows] = await pool.execute(
-		'SELECT password_hash FROM users WHERE username = ?',
-		[username]
-	);
-	if (!rows.length) return false;
-	return bcrypt.compare(password, rows[0].password_hash)
+  const [rows] = await pool.execute(
+    'SELECT password_hash FROM users WHERE email = ?',
+    [email]
+  );
+
+  if (!rows.length) return false;
+
+  const hash = rows[0].password_hash;
+  return bcrypt.compare(password, hash);
 }
 
 async function dbPing() {
