@@ -3,8 +3,8 @@
 </script>
 
 <form method="POST" action="?/logIn">
-  <input name="email" type="email" />
-  <input name="password" type="password" />
+  <input name="email" type="email" placeholder="email" />
+  <input name="password" type="password" placeholder="password"/>
   <button type="submit">Log In</button>
 
   {#if form?.missing}
