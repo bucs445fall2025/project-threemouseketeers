@@ -6,6 +6,7 @@ const express = require('express');
 // const cookieParser = require('cookie-parser');
 const { createUser, usernameTaken, verifyUser, dbPing, hashWord } = require('./password_storage.js');
 const { addQuestion, vote, answerQuestion, topQuestions } = require('./questions.js');
+const { getBio, setBio } = require('./user_bio.js');
 const { sessionMiddleware, requireAuth, getSessionUser, setSessionUser, destroySession} = require('./session.js');
 // const { use } = require('passport');
 
