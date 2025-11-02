@@ -16,6 +16,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(sessionMiddleware());
+app.set('etag', false);
+
+
 
 
 
@@ -72,8 +75,6 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ ok: false, error: 'Invalid credentials' });
     }
 
-    // // jwt token generation
-    // const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '1d' });
 
     //create/rotate server session from express-mysql-backend
     req.session.regenerate(err => {
@@ -81,30 +82,26 @@ app.post('/api/login', async (req, res) => {
         console.error('session regen failed', err);
         return res.status(500).json({ error : 'Session error, whoops'});
       }
-    });
-    //store non-private user session info (email)
-    setSessionUser(req, {email});
 
-    console.log("login successful");
-    return res.json({ ok: true });
+      // store minimal, non-sensitive info on the new session
+      setSessionUser(req, email);
+      // ensure the store writes the session before responding
+      req.session.save(saveErr => {
+        if (saveErr) {
+          console.error('session save failed', saveErr);
+          return res.status(500).json({ error: 'Session save error' });
+        }
+        console.log('login successful');
+        return res.json({ ok: true });
+      });
+    });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Internal error, whoops' });
   }
 });
 
-//* example protected route
-// app.get('/api/me', (req, res) => {
-//   const token = req.cookies['jwt'];
-//   if (!token) return res.status(401).json({ error: 'Not logged in' });
 
-//   try {
-//     const payload = jwt.verify(token, JWT_SECRET);
-//     res.json({ ok: true, email: payload.email });
-//   } catch (e) {
-//     res.status(401).json({ error: 'Invalid token' });
-//   }
-// });
 app.get('/api/me', (req, res) => {
   const user = getSessionUser(req);
   if(!user){

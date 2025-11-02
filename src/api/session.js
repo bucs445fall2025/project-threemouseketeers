@@ -37,18 +37,19 @@ function sessionMiddleware() {
 
 //require user to be logged in
 function requireAuth(req, res, next) {
-    if(req.session && req.session.user) return next();
+    if(req.session && req.session.email) return next();
     return res.status(401).json({ error: 'Not logged in!'});
 }
 
 //get current user's session info
 function getSessionUser(req) {
-    return req.session ? (req.session.user || null) : null;
+    return req.session ? (req.session.email || null) : null;
 }
 
 // set user on current session
-function setSessionUser(req, user) {
-    req.session.user = user;
+function setSessionUser(req, email) {
+    req.session.email = email;
+    console.log(`session user email is: ${req.session.email}`);
 }
 
 function destroySession(req) {
