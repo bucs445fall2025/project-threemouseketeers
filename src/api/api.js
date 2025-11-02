@@ -1,18 +1,19 @@
 // src/api/api.js
 require('dotenv').config();
 const express = require('express');
-// const jwt = require('jsonwebtoken');
-// const bodyParser = require('body-parser');
-// const cookieParser = require('cookie-parser');
+
 const { createUser, usernameTaken, verifyUser, dbPing, hashWord } = require('./password_storage.js');
 const { addQuestion, vote, answerQuestion, topQuestions } = require('./questions.js');
 const { sessionMiddleware, requireAuth, getSessionUser, setSessionUser, destroySession} = require('./session.js');
-// const { use } = require('passport');
+const cors = require('cors');
 
 
 const app = express();
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
 app.use(express.json());
-// app.use(cookieParser());
 app.use(sessionMiddleware());
 
 

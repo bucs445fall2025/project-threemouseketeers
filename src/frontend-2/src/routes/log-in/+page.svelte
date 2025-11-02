@@ -1,10 +1,32 @@
-<script>
+<script lang="js">
+  import { api } from '$lib/api';
+  import { hydrateUser } from '$lib/stores/auth';
+  // import { hydrate } from 'svelte';
+
+  let email = '';
+  let password = '';
+  let error = '';
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    const res = await api('/login', {
+      method: 'POST',
+      headers: {'content-type':'application/json'},
+      body: JSON.stringify({email, password})
+    });
+    if(!res.ok) {
+      error = 'Invalid credentials';
+      return;
+    }
+    await hydrateUser(); //pulls /api/me but with the new cookie
+  }
+
   export let form = {};
 </script>
 
-<form method="POST" action="?/logIn">
-  <input name="email" type="email" placeholder="email" />
-  <input name="password" type="password" placeholder="password"/>
+<form on:submit|preventDefault={onSubmit}>
+  <input bind:value={email} name="email" type="email" placeholder="email" />
+  <input bind:value={password} name="password" type="password" placeholder="password"/>
   <button type="submit">Log In</button>
 
   {#if form?.missing}
