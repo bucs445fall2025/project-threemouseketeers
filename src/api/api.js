@@ -2,7 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 
-const { createUser, usernameTaken, verifyUser, dbPing, hashWord } = require('./password_storage.js');
+const { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername } = require('./password_storage.js');
 const { addQuestion, vote, answerQuestion, topQuestions } = require('./questions.js');
 const { getBio, setBio } = require('./user_bio.js');
 const { sessionMiddleware, requireAuth, getSessionUser, setSessionUser, destroySession} = require('./session.js');
@@ -74,7 +74,7 @@ app.post('/api/login', async (req, res) => {
     if (!ok) {
       return res.status(401).json({ ok: false, error: 'Invalid credentials' });
     }
-
+    const user = fetchUsername(email); //gets the username variable so we can hydrate user info later
 
     //create/rotate server session from express-mysql-backend
     req.session.regenerate(err => {
@@ -82,7 +82,7 @@ app.post('/api/login', async (req, res) => {
         console.error('session regen failed', err);
         return res.status(500).json({ error : 'Session error, whoops'});
       }
-
+      
       // store minimal, non-sensitive info on the new session
       setSessionUser(req, email);
       // ensure the store writes the session before responding
@@ -119,7 +119,7 @@ app.post('/api/logout', async (req, res) => {
 
 app.get('/api/private/data', requireAuth,(req, res) => {
   const user = getSessionUser(req);
-  res.json({ message: `welcome, ${user.username || 'user'}!`, user: getSessionUser(req)});
+  res.json({ message: `welcome, ${user.email || 'user'}!`, user: getSessionUser(req)});
 });
 
 

@@ -1,6 +1,7 @@
 <script lang="js">
   import { api } from '$lib/api';
   import { hydrateUser } from '$lib/stores/auth';
+  import { goto } from '$app/navigation';
   // import { hydrate } from 'svelte';
 
   let email = '';
@@ -19,6 +20,8 @@
       return;
     }
     await hydrateUser(); //pulls /api/me but with the new cookie
+    goto('/profile');
+
   }
 
   export let form = {};

@@ -91,7 +91,13 @@ async function dbPing() {
 	await pool.query('SELECT 1');
 	return true;
 }
-
+async function fetchUsername(email){ //this might create some security issues
+	const [rows] = await pool.execute(
+		'SELECT * FROM users WHERE email = ?',
+		[email]
+	);
+	return rows[0].username;
+}
 
 
 //this is a testing suite, we should not be hard coding our functions with test variables
@@ -100,4 +106,4 @@ async function test(){
 
 }
 
-module.exports = { createUser, usernameTaken, verifyUser, dbPing, hashWord}; 
+module.exports = { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername}; 
