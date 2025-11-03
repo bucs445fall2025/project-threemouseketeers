@@ -12,3 +12,6 @@ As a student, I want to be the only one using my account so that no one else pre
 
 ##User Story: Privacy
 As a student, I want to keep some of my information private so that it is not seen by other users.
+
+##User Story: Student Profile
+As a student, I want to update my public profile so that parents can find what I have in common with their child.
