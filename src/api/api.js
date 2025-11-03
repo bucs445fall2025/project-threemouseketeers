@@ -54,7 +54,7 @@ app.post('/api/signup', async (req, res) => {
       return res.status(400).json({ error: 'username, email, password required' });
     }
     const result = await createUser({ username, email, password });
-    console.log('login succesful');
+    console.log('account create succesful');
     res.status(201).json(result);
   } catch (e) {
     console.log('account create failed');
@@ -98,6 +98,42 @@ app.post('/api/login', async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Internal error, whoops' });
+  }
+});
+
+//fetch user bio
+app.post('/api/fetchbio', async (req, res) =>{
+  console.log('get bio requested');
+  try {
+    const { username } = req.body || {};
+    if (!username) {
+      console.log('username missing');
+      return res.status(400).json({ error: 'username required' });
+    }
+    const result = await getBio({ username });
+    console.log('get bio succesful');
+    return res.status(201).json(result);
+  } catch (e) {
+    console.log('get bio failed');
+    return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
+  }
+});
+
+//update user bio
+app.post('/api/updatebio', async (req, res) =>{
+  console.log('update bio requested');
+  try {
+    const { username, newBio } = req.body || {};
+    if (!username || !newBio) {
+      console.log('username or new bio missing');
+      return res.status(400).json({ error: 'username and new bio required' });
+    }
+    const result = await setBio({ username, newBio });
+    console.log('update bio succesful');
+    return res.status(201).json(result);
+  } catch (e) {
+    console.log('update bio failed');
+    return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
   }
 });
 

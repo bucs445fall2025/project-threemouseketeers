@@ -18,25 +18,35 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-async function getBio(email) {
+async function getBio({username}) {
 	//retrieve user bio
     const [results] = await pool.execute(
-        'SELECT bio FROM users WHERE email = ?',
-        [email]
-    )
+        'SELECT * FROM users WHERE username = ?',
+        [username]
+    );
+    if (!results.length) {
+        const err = new Error('user bio was not found');
+		err.status = 500;
+		throw err;	
+    }
+
     userBio = results[0].bio;
-    
-    return userBio;
+    return {bio: userBio};
 }
 
-async function setBio({email, newBio}) {
+async function setBio({username, newBio}) {
     //update user bio
     const [update] = await pool.execute(
-        'UPDATE users SET bio = ? WHERE email = ?',
-        [newBio, email]
-    )
+        'UPDATE users SET bio = ? WHERE username = ?',
+        [newBio, username]
+    );
+    if(update.affectedRows != 1) {
+        const err = new Error('user bio was not updated');
+		err.status = 500;
+		throw err;	
+    }
 
-	return true;
+	return {bio: newBio};
 }
 
 module.exports = { getBio, setBio };

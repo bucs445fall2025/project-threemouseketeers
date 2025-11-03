@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
   username VARCHAR(50) UNIQUE NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
-  bio VARCHAR(255) DEFAULT '',
+  bio VARCHAR(255) DEFAULT 'No information given.',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
