@@ -2,11 +2,12 @@
 require('dotenv').config();
 const express = require('express');
 
-const { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername } = require('./password_storage.js');
+const { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail} = require('./password_storage.js');
 const { addQuestion, vote, answerQuestion, topQuestions } = require('./questions.js');
 const { getBio, setBio } = require('./user_bio.js');
 const { sessionMiddleware, requireAuth, getSessionUser, setSessionUser, destroySession} = require('./session.js');
 const cors = require('cors');
+const { UserDTO } = require('./user_dto');
 
 
 const app = express();
@@ -74,7 +75,8 @@ app.post('/api/login', async (req, res) => {
     if (!ok) {
       return res.status(401).json({ ok: false, error: 'Invalid credentials' });
     }
-    const user = fetchUsername(email); //gets the username variable so we can hydrate user info later
+    const user = await fetchUserbyEmail(email);  //gets the userDTO so we can hydrate user info later
+
 
     //create/rotate server session from express-mysql-backend
     req.session.regenerate(err => {
@@ -82,9 +84,9 @@ app.post('/api/login', async (req, res) => {
         console.error('session regen failed', err);
         return res.status(500).json({ error : 'Session error, whoops'});
       }
-      
+
       // store minimal, non-sensitive info on the new session
-      setSessionUser(req, email);
+      setSessionUser(req, user.id);
       // ensure the store writes the session before responding
       req.session.save(saveErr => {
         if (saveErr) {
@@ -138,12 +140,20 @@ app.post('/api/updatebio', async (req, res) =>{
 });
 
 
-app.get('/api/me', (req, res) => {
-  const user = getSessionUser(req);
-  if(!user){
+app.get('/api/me', async (req, res) => {
+  
+  const uid = getSessionUser(req);
+  if(!uid){
     return res.status(401).json({ error: 'Not logged in' })
   };
-    res.json({ ok:true, user});
+  const user = await fetchUserbyUID(uid);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  
+  //disable caching for identity cookies
+  res.set('Cache-Control', 'no-store');
+  res.set('Vary', 'Cookie');
+
+  res.json({ ok:true, user});
 });
 
 app.post('/api/logout', async (req, res) => {
@@ -153,9 +163,10 @@ app.post('/api/logout', async (req, res) => {
   res.json({ ok: true});
 });
 
-app.get('/api/private/data', requireAuth,(req, res) => {
-  const user = getSessionUser(req);
-  res.json({ message: `welcome, ${user.email || 'user'}!`, user: getSessionUser(req)});
+app.get('/api/private/data', requireAuth, async (req, res) => {
+  const uid = getSessionUser(req);
+  const user = await fetchUserbyUID(uid);
+  res.json({ message: `welcome, ${user?.username || 'user'}!`, user});
 });
 
 

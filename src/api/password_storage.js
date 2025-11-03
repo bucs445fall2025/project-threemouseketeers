@@ -2,6 +2,8 @@ require('dotenv').config();
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
 const { generateUsername } = require('unique-username-generator')
+const { UserDTO } = require('./user_dto');
+
 
 const DB_HOST = process.env.DB_HOST;
 const MYSQL_USER = process.env.MYSQL_USER;
@@ -19,8 +21,6 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0
 });
-
-
 
 
 
@@ -99,6 +99,25 @@ async function fetchUsername(email){ //this might create some security issues
 	return rows[0].username;
 }
 
+async function fetchUserbyUID(uid){
+	const [rows] = await pool.execute(
+		'SELECT id, username, email, bio FROM `users` WHERE id = ?',
+		[uid]
+	);
+	const row = rows[0];
+	if (!row) return null;
+	return{ ...UserDTO, ...row}
+}
+
+async function fetchUserbyEmail(email){
+	const [rows] = await pool.execute(
+	'SELECT id, username, email, bio FROM `users` WHERE email = ?',
+	[email]
+	);
+	const row = rows[0];
+	if (!row) return null;
+	return{ ...UserDTO, ...row}
+}
 
 //this is a testing suite, we should not be hard coding our functions with test variables
 
@@ -106,4 +125,4 @@ async function test(){
 
 }
 
-module.exports = { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername}; 
+module.exports = { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail}; 
