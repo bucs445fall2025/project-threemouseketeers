@@ -2,7 +2,7 @@
   export const prerender = true;
 	import favicon from '$lib/assets/favicon.svg';
 
-	let { children, data } = $props();
+  export let data;
 
   import { page } from '$app/stores'; // This gets info about the URL
 </script>
@@ -36,7 +36,8 @@
   </div>
 </nav>
 
-{@render children?.()}
+<slot />
+
 
 <style>
   .navbar {

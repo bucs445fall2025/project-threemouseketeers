@@ -1,13 +1,8 @@
-// export const load = ({ cookies }) => {
-//   const token = cookies.get('jwt');
-//   return { token };
-// };
+//layout.server.js
 
-import { hydrateUser, user } from "$lib/stores/auth";
-
-export async function load() {
-  await hydrateUser(); // populates store if session cookie valid
-  let current;
-  user.subscribe(value => current = value)();
-  return {user: current};
+export async function load({ fetch }) {
+  const r = await fetch('/api/me', { cache: 'no-store' });
+  if (!r.ok) return { user: null };
+  const { user } = await r.json(); // { id, username, email, bio }
+  return { user };
 }

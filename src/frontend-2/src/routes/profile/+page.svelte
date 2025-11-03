@@ -1,7 +1,20 @@
-
 <script>
+
   export let form = {};
+
+  export let data;
+  const user = data.user;
 </script>
+
+{#if data.user}
+  <h1>{data.user.username} (the former)</h1>
+{:else}
+  <h1>Loading…</h1>
+{/if}
+
+{#if user}
+  <h1>{user.username} (the latter)</h1>
+{/if}
 
 <form method="POST" action="?/fetchBio">
   <input name="username" type="text" placeholder="Username" />

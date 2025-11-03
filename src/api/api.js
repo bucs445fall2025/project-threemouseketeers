@@ -141,7 +141,7 @@ app.post('/api/updatebio', async (req, res) =>{
 
 
 app.get('/api/me', async (req, res) => {
-  
+  console.log(`api/me called`)
   const uid = getSessionUser(req);
   if(!uid){
     return res.status(401).json({ error: 'Not logged in' })

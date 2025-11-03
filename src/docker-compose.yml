@@ -67,7 +67,7 @@ services:
   tests:
     container_name: db_test
     image: mysql:latest
-    depends_on:
+    depends_on:  
       db:
         condition: service_healthy
     volumes:
