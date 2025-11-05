@@ -28,9 +28,9 @@ services:
       - "5173:5173"  # SvelteKit dev server port
     depends_on:
       - api
-    # volumes:
-    #   - .:/app               # Mount local code for live reload
-    #   - /app/node_modules    # Keep installed deps
+    volumes:
+      - ./frontend-2:/app         # Mount source code for hot reload
+      - /app/node_modules         # Prevent host node_modules from overwriting container deps
     environment:
       - NODE_ENV=development
       - API_URL=http://api:8080   # Set up api route for frontend calls
