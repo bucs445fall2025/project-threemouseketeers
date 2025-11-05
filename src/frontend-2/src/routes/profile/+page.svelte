@@ -6,6 +6,16 @@
   const user = data.user;
 </script>
 
+<form method="POST">
+  <button
+    type="submit"
+    formaction="?/logout"
+    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+  >
+    Log out
+  </button>
+</form>
+
 {#if data.user}
   <h1>{data.user.username} (the former)</h1>
 {:else}

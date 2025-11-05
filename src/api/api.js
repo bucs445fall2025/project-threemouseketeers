@@ -56,14 +56,36 @@ app.post('/api/signup', async (req, res) => {
     }
     const result = await createUser({ username, email, password });
     console.log('account create succesful');
-    res.status(201).json(result);
+    
+    // TODO: Break following code (repeated in create-user) into function?
+    const user = await fetchUserbyEmail(email);  //gets the userDTO so we can hydrate user info later
+    
+    //create/rotate server session from express-mysql-backend
+    req.session.regenerate(err => {
+      if(err) {
+        console.error('session regen failed', err);
+        return res.status(500).json({ error : 'Session error, whoops'});
+      }
+
+      // store minimal, non-sensitive info on the new session
+      setSessionUser(req, user.id);
+      // ensure the store writes the session before responding
+      req.session.save(saveErr => {
+        if (saveErr) {
+          console.error('session save failed', saveErr);
+          return res.status(500).json({ error: 'Session save error' });
+        }
+        console.log('signup + login successful');
+        return res.json({ ok: true });
+      });
+    });
   } catch (e) {
     console.log('account create failed');
     return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
   }
 });
 
-// login (optional)
+// login
 app.post('/api/login', async (req, res) => {
   console.log('login requested');
   try {
@@ -76,7 +98,6 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ ok: false, error: 'Invalid credentials' });
     }
     const user = await fetchUserbyEmail(email);  //gets the userDTO so we can hydrate user info later
-
 
     //create/rotate server session from express-mysql-backend
     req.session.regenerate(err => {
@@ -157,6 +178,7 @@ app.get('/api/me', async (req, res) => {
 });
 
 app.post('/api/logout', async (req, res) => {
+  console.log("api/logout called")
   await destroySession(req);
 
   res.clearCookie(process.env.SESSION_COOKIE_NAME || 'sid');

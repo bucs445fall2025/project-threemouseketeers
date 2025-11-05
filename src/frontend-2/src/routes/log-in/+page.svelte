@@ -21,7 +21,6 @@
     }
     await hydrateUser(); //pulls /api/me but with the new cookie
     goto('/profile');
-
   }
 
   export let form = {};

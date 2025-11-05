@@ -29,12 +29,27 @@ export const actions = {
         body: JSON.stringify({ username, email, password})
         });
 
-        const data = await res.json().catch(() => ({}));
-        if(!res.ok) {
-          return fail(res.status, {email, apiError: data.error || 'Sign-up failed, whoops'});
-        }
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) {
+        return fail(res.status, {email, apiError: data.error || 'Sign-up failed, whoops'});
+      }
 
-        return {success: true, userId: data.id};
+      const loginRes = await fetch('http://api:8080/api/login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const loginData = await loginRes.json().catch(() => ({}));
+
+      if (!loginRes.ok) {
+        return fail(loginRes.status, { email, apiError: loginData.error || 'Login failed' });
+      }
+
+      // If login sets a cookie, SvelteKit will forward it automatically if fetch is the load-action fetch.
+      return { success: true, user: loginData.user || { id: data.id, email } };
+      
+      return {success: true, userId: data.id};
     } catch(err){
       return fail(500, {email, apiError: err?.message || 'Server error, whoops'});
     }

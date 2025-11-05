@@ -66,5 +66,24 @@ export const actions = {
     } catch(err){
       return fail(500, {username, apiError: err?.message || 'Server error, whoops'});
     }
+  },
+
+  logout: async ({ fetch, cookies }) => {
+    const API_BASE = 'http://api:8080';
+    try {
+      await fetch(`${API_BASE}/api/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      cookies.delete('SessionID', { path: '/' });
+
+    } catch (err) {
+      console.error('Logout request failed:', err);
+      // Optionally handle errors, but don’t block redirect
+    }
+
+    // Redirect whether or not API call succeeded
+    throw redirect(303, '/');
   }
 }
