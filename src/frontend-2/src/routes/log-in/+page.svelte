@@ -19,8 +19,10 @@
       error = 'Invalid credentials';
       return;
     }
-    await hydrateUser(); //pulls /api/me but with the new cookie
-    goto('/profile');
+    // await hydrateUser(); //pulls /api/me but with the new cookie
+    // goto('/profile', { replaceState: true, reload: true });
+    
+    window.location.href = '/profile';
   }
 
   export let form = {};

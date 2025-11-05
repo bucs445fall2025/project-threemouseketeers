@@ -17,13 +17,9 @@
 </form>
 
 {#if data.user}
-  <h1>{data.user.username} (the former)</h1>
+  <h1>Hello, {data.user.username}</h1>
 {:else}
-  <h1>Loading…</h1>
-{/if}
-
-{#if user}
-  <h1>{user.username} (the latter)</h1>
+  <h1>Loading…</h1> <!-- This should really never happen -->
 {/if}
 
 <form method="POST" action="?/fetchBio">
