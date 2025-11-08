@@ -18,39 +18,31 @@
 
 {#if data.user}
   <h1>Hello, {data.user.username}</h1>
+  <p>{data.user.bio}</p>
+
+  <form method="POST">
+    <input name="newBio" type="text" placeholder="New Bio"/>
+    <input name="username" type="hidden" value={data.user.username}/>
+    <button
+      type="submit"
+      formaction="?/updateBio"
+    >
+      Update Bio
+    </button>
+
+    {#if form?.missing}
+      <p style="color:red">Please fill in all fields.</p>
+    {/if}
+    {#if form?.apiError}
+      <p style="color:red">{form.apiError}</p>
+    {/if}
+    {#if form?.success}
+      <p style="color:green">User bio updated!</p>
+    {/if}
+  </form>
+
 {:else}
   <h1>Loading…</h1> <!-- This should really never happen -->
 {/if}
 
-<form method="POST" action="?/fetchBio">
-  <input name="username" type="text" placeholder="Username" />
-  <button type="submit">Fetch Bio</button>
 
-  {#if form?.missing}
-    <p style="color:red">Please fill in all fields.</p>
-  {/if}
-  {#if form?.apiError}
-    <p style="color:red">{form.apiError}</p>
-  {/if}
-  {#if form?.success}
-    <p style="color:green">User bio found!</p>
-    <p>{form?.userBio}</p>
-  {/if}
-</form>
-
-<form method="POST" action="?/updateBio">
-  <input name="username" type="text" placeholder="Username" />
-  <input name="newBio" type="text" placeholder="New Bio" />
-  <button type="submit">Update Bio</button>
-
-  {#if form?.missing}
-    <p style="color:red">Please fill in all fields.</p>
-  {/if}
-  {#if form?.apiError}
-    <p style="color:red">{form.apiError}</p>
-  {/if}
-  {#if form?.success}
-    <p style="color:green">User bio updated!</p>
-    <p>{form?.userBio}</p>
-  {/if}
-</form>

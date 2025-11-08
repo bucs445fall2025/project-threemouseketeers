@@ -9,35 +9,6 @@ const API_KEY = '';
 }*/
 
 export const actions = {
-  fetchBio: async ({ request, fetch }) => {
-    console.log('fetch bio requested');
-    const formData = await request.formData()
-    const username = String(formData.get('username'))
-
-    if (!username) {
-      return fail(400, { username, missing: true })
-    }
-
-    try {
-    console.log('calling api/fetchbio')
-    const res = await fetch('http://api:8080/api/fetchbio', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json'},
-      body: JSON.stringify({username})
-    });
-
-    const data = await res.json().catch(() => ({}));
-    if(!res.ok) {
-      return fail(res.status, {username, apiError: data.error || 'Fetch bio failed, whoops'});
-    }
-
-      return {success: true, userBio: data.bio};
-    } catch(err){
-      return fail(500, {username, apiError: err?.message || 'Server error, whoops'});
-    }
-  },
-
   updateBio: async ({ request, fetch }) => {
     console.log('update bio requested');
     const formData = await request.formData()
