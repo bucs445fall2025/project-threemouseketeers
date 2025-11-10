@@ -2,45 +2,54 @@
 
 *note: replace anything surrounded by << >> and **remove** the << >>*
 
-**Attended**: << record the team members in attendance (virtual counts as long as they are participating) >>
+**Attended**: John Birchwood, David Krein, Senih Okuyucu  
 
-**DATE**: << meeting date >>
+**DATE**: 11/10/2025
 
 ***
 
-## Sprint << num >> Review
+## Sprint 6 Review
 
 ### SRS Sections Updated
 
-<< List any SRS sections that were updated in the last sprint >>
+
 
 ### User Story
 
-<< Corresponding User Stories completed in this sprint >>
+- FAQ Database: FAQ Questions  
+- FAQ DataBase: FAQ Answers  
+- Student Account: User Profile  
+- Student Account: University Email  
 
 ### Sprint Requirements Attempted
 
-<< The corresponding SRS requirement that the team completed in the last sprint >>
+- User logout  
+- Profile page for individual user  
+- Web page for email verification  
+- Questions/answers page  
 
 ### Completed Requirements
 
-<< The work that's been completed in this sprint >>
+- User logout  
+- Profile page for individual user  
+- Web page for email verification (not implemented on back end)  
+- Questions/answers page  
 
 ### Incomplete Requirements
 
-<< The work that has not been completed in this sprint. Be VERY detailed and specific regarding what isn't working and what needs to be completed >>
 
 ### The summary of the entire project
 
-<< A general overview of the entire project >>
+The main features are taking shape, with user accounts and basic functions working.  
+Need to update automatic tests to make them current with new features.
 
 ***
 
-## Sprint << num >> Planning
+## Sprint 7 Planning
 
 ## Requirements Flex
 
-<< # >>/5 requirement flexes remaining
+<< # >>/3 requirement flexes remaining
 
 ## Technical Debt
 
