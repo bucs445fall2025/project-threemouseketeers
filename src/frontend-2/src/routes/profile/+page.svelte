@@ -41,8 +41,17 @@
     {/if}
   </form>
 
+  {#if data.user.verified === 0}
+    <form method="POST">
+      <button
+        type="submit"
+        formaction="?/verify"
+      >
+        Verify Email
+      </button>
+    </form>
+  {/if}
+
 {:else}
   <h1>Loading…</h1> <!-- This should really never happen -->
 {/if}
-
-
