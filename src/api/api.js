@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 
 const { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail} = require('./password_storage.js');
-const { addQuestion, vote, answerQuestion, topQuestions } = require('./questions.js');
+const { addQuestion, vote, answerQuestion, topQuestions, getAllQuestions } = require('./questions.js');
 const { getBio, setBio } = require('./user_bio.js');
 const { sessionMiddleware, requireAuth, getSessionUser, setSessionUser, destroySession} = require('./session.js');
 const cors = require('cors');
@@ -56,7 +56,7 @@ app.post('/api/signup', async (req, res) => {
     }
     const result = await createUser({ username, email, password });
     console.log('account create succesful');
-    
+
     // TODO: Break following code (repeated in create-user) into function?
     const user = await fetchUserbyEmail(email);  //gets the userDTO so we can hydrate user info later
     
@@ -191,6 +191,15 @@ app.get('/api/private/data', requireAuth, async (req, res) => {
   res.json({ message: `welcome, ${user?.username || 'user'}!`, user});
 });
 
+app.get('/api/allquestions', async (req, res) => {
+  console.log("Get all questions requested from API");
+
+  const allQuestionsResult = await getAllQuestions(1);
+
+  console.log("returned from questions.js = ", allQuestionsResult);
+
+  res.json({ ok: true, allQuestionsResult});
+});
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Bridge listening on :${PORT}`);
