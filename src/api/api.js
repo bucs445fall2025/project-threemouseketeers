@@ -222,6 +222,25 @@ app.post('/api/askquestion', async (req, res) => {
   }
 })
 
+app.post('/api/answerquestion', async (req, res) => {
+  console.log("Answer question requested of API");
+
+  try {
+    const { username, questionID, answer } = req.body || {};
+    if (!username || !questionID || !answer) {
+      console.log('username or question ID or answer text missing');
+      return res.status(400).json({ error: 'username and question ID and answer text required' });
+    }
+
+    const result = await answerQuestion(questionID, answer, username);
+    console.log('Answer question succesful');
+    return res.status(201).json(result);
+  } catch (e) {
+    console.log('answer question failed');
+    return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
+  }
+})
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Bridge listening on :${PORT}`);
 });

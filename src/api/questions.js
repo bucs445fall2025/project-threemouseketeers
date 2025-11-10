@@ -72,11 +72,10 @@ async function answerQuestion(questionId, newAnswer, username) {
 		[questionId, newAnswer, username]
 	)
 	
-	//increment num_answers
 	const [update] = await pool.execute(
-		'UPDATE questions SET num_answer = ? WHERE id = ?',
-		[num_answer + 1, questionId]
-	)
+    'UPDATE questions SET num_answers = num_answers + 1 WHERE id = ?',
+    [questionId]
+  );
 	
 	return true;
 }
@@ -100,6 +99,43 @@ async function topQuestions(numRows, minVotes) {
 	return results;
 }
 
+// async function getAllQuestions(numRows) {
+//   // Get total number of questions
+//   const [count] = await pool.execute(
+//     'SELECT COUNT(*) AS questionsCount FROM questions'
+//   );
+
+//   if (count[0].questionsCount < numRows) {
+//     console.warn('Not enough questions in database.');
+//     numRows = count[0].questionsCount;
+
+//   }
+
+//   // Get all questions and their answers
+//   const [results] = await pool.execute(
+//     `
+//     SELECT 
+//       q.id AS question_id,
+//       q.question,
+//       q.username AS question_user,
+//       q.votes AS question_votes,
+//       q.num_answers,
+//       q.accepted_answer_id,
+//       q.created_at,
+//       a.id AS answer_id,
+//       a.answer,
+//       a.username AS answer_user,
+//       a.votes AS answer_votes,
+//       a.accepted_answer
+//     FROM questions q
+//     LEFT JOIN answers a ON q.id = a.question_id
+//     ORDER BY q.votes DESC
+//     `
+//   );
+
+//   return results;
+// }
+
 async function getAllQuestions(numRows) {
   // Get total number of questions
   const [count] = await pool.execute(
@@ -109,12 +145,10 @@ async function getAllQuestions(numRows) {
   if (count[0].questionsCount < numRows) {
     console.warn('Not enough questions in database.');
     numRows = count[0].questionsCount;
-
   }
 
   // Get all questions and their answers
-  const [results] = await pool.execute(
-    `
+  const [rows] = await pool.execute(`
     SELECT 
       q.id AS question_id,
       q.question,
@@ -130,11 +164,39 @@ async function getAllQuestions(numRows) {
       a.accepted_answer
     FROM questions q
     LEFT JOIN answers a ON q.id = a.question_id
-    ORDER BY q.votes DESC
-    `
-  );
+    ORDER BY q.created_at DESC
+  `);
 
-  return results;
+  // Group answers under each question
+  const questionsMap = new Map();
+
+  for (const row of rows) {
+    if (!questionsMap.has(row.question_id)) {
+      questionsMap.set(row.question_id, {
+        id: row.question_id,
+        question: row.question,
+        username: row.question_user,
+        votes: row.question_votes,
+        num_answers: row.num_answers,
+        accepted_answer_id: row.accepted_answer_id,
+        created_at: row.created_at,
+        answers: []
+      });
+    }
+
+    if (row.answer_id) {
+      questionsMap.get(row.question_id).answers.push({
+        id: row.answer_id,
+        answer: row.answer,
+        username: row.answer_user,
+        votes: row.answer_votes,
+        accepted: !!row.accepted_answer
+      });
+    }
+  }
+
+  // Convert Map to array
+  return Array.from(questionsMap.values());
 }
 
 async function test(){
