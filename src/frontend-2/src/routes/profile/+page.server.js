@@ -56,5 +56,9 @@ export const actions = {
 
     // Redirect whether or not API call succeeded
     throw redirect(303, '/');
+  },
+
+  verify: async () => {
+    throw redirect(303, '/verify-email');
   }
 }
