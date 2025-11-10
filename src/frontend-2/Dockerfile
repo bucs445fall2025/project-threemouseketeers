@@ -1,4 +1,4 @@
-FROM node:22-bullseye
+FROM node:jod-alpine3.21
 
 WORKDIR /app
 

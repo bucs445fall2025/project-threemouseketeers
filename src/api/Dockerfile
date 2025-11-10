@@ -1,4 +1,4 @@
-FROM node:24
+FROM node:jod-alpine3.21
 
 # This can be changed later
 WORKDIR /api
@@ -11,4 +11,3 @@ COPY . /api/.
 EXPOSE 8080
 
 CMD ["node", "api.js"]
-#CMD ["node", "create_user.js"]
