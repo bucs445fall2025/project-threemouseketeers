@@ -201,6 +201,27 @@ app.get('/api/allquestions', async (req, res) => {
   res.json({ ok: true, allQuestionsResult});
 });
 
+app.post('/api/askquestion', async (req, res) => {
+  console.log("Ask a question requested of API");
+
+  try {
+    const { username, question } = req.body || {};
+    if (!username || !question) {
+      console.log('username or question text missing');
+      return res.status(400).json({ error: 'username and question body required' });
+    }
+
+    console.log("asking question with username ", username, " and question text ", question);
+
+    const result = await addQuestion(question, username);
+    console.log('Ask question succesful');
+    return res.status(201).json(result);
+  } catch (e) {
+    console.log('ask question failed');
+    return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
+  }
+})
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Bridge listening on :${PORT}`);
 });

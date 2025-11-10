@@ -1,10 +1,33 @@
 <script>
+  export let form = {};
+
   export let data;
 
-  console.log(data);
+  const user = data.user;
 </script>
 
 <h1>Questions and Answers</h1>
+
+{#if user}
+  <h2>Post/Answer goes here</h2>
+  <form method="POST">
+    <input name="username" type="hidden" value={user.username}/>
+    <input name="question" type="text" placeholder="Ask a question..."/>
+    <button type="submit", formaction="?/askQuestion">Ask</button>
+
+    {#if form?.missing}
+      <p style="color:red">Please fill in all fields.</p>
+    {/if}
+    {#if form?.apiError}
+      <p style="color:red">{form.apiError}</p>
+    {/if}
+    {#if form?.success}
+      <p style="color:green">Asked Successfully!</p>
+    {/if}
+  </form>
+{:else}
+  <h2>Please log in to ask/answer questions</h2>
+{/if}
 
 {#if data.questions.length === 0}
   <p>No questions found.</p>
