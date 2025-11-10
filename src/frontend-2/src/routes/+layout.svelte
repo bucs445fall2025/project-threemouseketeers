@@ -13,8 +13,9 @@
 
 <nav class="navbar">
 	<ul class="nav-links">
-    <li><a href='./'>Home</a></li>
-	</ul>
+    <li><a href='/'>Home</a></li>
+    <li><a href='/questions'>Questions</a></li>	
+  </ul>
   <div class="user-bar">
     {#if !data.user}
       {#if $page.url.pathname === '/log-in'}
