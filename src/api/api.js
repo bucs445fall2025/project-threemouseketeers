@@ -191,6 +191,8 @@ app.get('/api/private/data', requireAuth, async (req, res) => {
   res.json({ message: `welcome, ${user?.username || 'user'}!`, user});
 });
 
+// TODO: Rename the routes to /api/question/___ 
+
 app.get('/api/allquestions', async (req, res) => {
   console.log("Get all questions requested from API");
 
@@ -237,6 +239,23 @@ app.post('/api/answerquestion', async (req, res) => {
     return res.status(201).json(result);
   } catch (e) {
     console.log('answer question failed');
+    return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
+  }
+})
+
+app.post('/api/voteanswer', async (req, res) => {
+  try {
+    const { answerId } = req.body || {};
+    if (!answerId) {
+      console.log('answer ID missing');
+      return res.status(400).json({ error: 'answer ID required' });
+    }
+
+    const result = await vote(answerId);
+    console.log('Vote for answer succesful');
+    return res.status(201).json(result);
+  } catch (e) {
+     console.log('vote for answer failed');
     return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
   }
 })

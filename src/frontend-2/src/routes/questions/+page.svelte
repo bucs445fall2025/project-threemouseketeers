@@ -4,6 +4,51 @@
   export let data;
 
   const user = data.user;
+
+  let questions = data.questions;
+
+  async function voteAnswer(questionId, answerId) {
+    try {
+      const res = await fetch(`/api/voteanswer`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'},
+        body: JSON.stringify({ answerId })
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        // Optimistically update vote count on frontend
+        const question = questions.find(q => q.id === questionId);
+        const aIndex = question.answers.findIndex(a => a.id === answerId);
+
+        if (aIndex !== -1) {
+          // If backend returned updated answer object, use it; otherwise increment locally
+          if (data?.answer) {
+            question.answers[aIndex] = { ...question.answers[aIndex], ...data.answer };
+          } else {
+            // safe increment: ensure votes is a number
+            question.answers[aIndex].votes = (Number(question.answers[aIndex].votes) || 0) + 1;
+          }
+        } else if (data?.answer) {
+          // answer not present locally but server returned it => add it
+          q.answers.push(data.answer);
+        } else {
+          console.warn('Answer not found locally and server did not return updated answer');
+        }
+
+        // reassignment makes the page reactive 
+        questions = [...questions];
+      }
+      else {
+        console.warn("Could note vote for answer successfully");
+      }
+    } catch (err) {
+      console.error('Vote for answer failed:', err);
+    }
+  }
+
 </script>
 
 <h1>Questions and Answers</h1>
@@ -25,10 +70,10 @@
   <h2>Please log in to ask/answer questions</h2>
 {/if}
 
-{#if data.questions.length === 0}
+{#if questions.length === 0}
   <p>No questions found.</p>
 {:else}
-  {#each data.questions as q (q.id)}
+  {#each questions as q (q.id)}
     <div class="question">
       <h2>{q.question}</h2>
       <p>
@@ -49,6 +94,9 @@
                   <span style="color: green;">✔ Accepted</span>
                 {/if}
               </small>
+              {#if data.user}
+                <button on:click={() => voteAnswer(q.id, a.id)}>Vote</button>
+              {/if}
             </div>
           {/each}
         </div>
@@ -56,19 +104,21 @@
         <p class="no-answers">No answers yet.</p>
       {/if}
 
-      <form method="POST">
-        <input name="username" type="hidden" value={user.username}/>
-        <input name="questionID" type="hidden" value={q.id}>
-        <input name="answer" type="text" placeholder="Submit an answer..."/>
-        <button type="submit", formaction="?/answerQuestion">Answer</button>
+      {#if data.user}
+        <form method="POST">
+          <input name="username" type="hidden" value={user.username}/>
+          <input name="questionID" type="hidden" value={q.id}>
+          <input name="answer" type="text" placeholder="Submit an answer..."/>
+          <button type="submit", formaction="?/answerQuestion">Answer</button>
 
-        {#if form?.missing}
-          <p style="color:red">Please fill in all fields.</p>
-        {/if}
-        {#if form?.apiError}
-          <p style="color:red">{form.apiError}</p>
-        {/if}
-      </form>
+          {#if form?.missing}
+            <p style="color:red">Please fill in all fields.</p>
+          {/if}
+          {#if form?.apiError}
+            <p style="color:red">{form.apiError}</p>
+          {/if}
+        </form>
+      {/if}
 
     </div>
     <hr>
