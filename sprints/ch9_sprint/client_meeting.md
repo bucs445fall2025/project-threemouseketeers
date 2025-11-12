@@ -2,29 +2,32 @@
 
 ## SRS Section(s)Updated
 
+Known Bugs
 
 ## Requirements Attempted in this Sprint
 
+User logout
+Profile page for individual user
+Web page for email verification
+Questions/answers page
 
 ## Requirements complete
 
+User logout
+Profile page for individual user
+Web page for email verification
+Questions/answers page
 
 ## Requirements incomplete
 
-
-## Requirement Flex Remaining
-
-3/3
-
-## Requirements Attempted in next Sprint
+N/A
 
 
 ## Milestone Status
 
+Pass
 
-## Requested Changes
+## Remaining Requirements
 
-
-## Additional Notes
-
-
+- Assign traits
+- Email Verification
