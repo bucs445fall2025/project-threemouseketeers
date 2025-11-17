@@ -129,6 +129,7 @@ async function createEmailToken(uid){
 	[uid, token, expiresAt]
 	);
 	
+	return token;
 	// return rows[0].token;
 }
 
@@ -146,11 +147,11 @@ async function consumeEmailToken(token) {
   }
 
   // mark used
-  const [ids] = await pool.execute(
+  await pool.execute(
     'UPDATE email_tokens SET used = 1 WHERE id = ?',
     [record.id]
   );
-  return ids[0].user_id;
+  return record.user_id;
 }
 
 async function verifyAccountEmail(uid){
