@@ -3,6 +3,7 @@ const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
 const { generateUsername } = require('unique-username-generator')
 const { UserDTO } = require('./user_dto');
+const crypto = require("crypto");
 
 
 const DB_HOST = process.env.DB_HOST;
@@ -119,10 +120,50 @@ async function fetchUserbyEmail(email){
 	return{ ...UserDTO, ...row}
 }
 
+async function createEmailToken(uid){
+	const token = crypto.randomBytes(32).toString('hex');
+	const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour from creation
+
+	const [rows] = await pool.execute(
+	'INSERT INTO email_tokens (user_id, token, expires_at) VALUES (?, ?, ?)',
+	[uid, token, expiresAt]
+	);
+	
+	// return rows[0].token;
+}
+
+async function consumeEmailToken(token) {
+  const [rows] = await pool.execute(
+    'SELECT * FROM email_tokens WHERE token = ?',
+    [token]
+  );
+  const record = rows[0];
+  if (!record) return null;
+
+  const now = new Date();
+  if (record.used || new Date(record.expires_at) < now) {
+    return null;
+  }
+
+  // mark used
+  const [ids] = await pool.execute(
+    'UPDATE email_tokens SET used = 1 WHERE id = ?',
+    [record.id]
+  );
+  return ids[0].user_id;
+}
+
+async function verifyAccountEmail(uid){
+	await pool.execute(
+	'UPDATE users SET verified = 1 where id = ?',
+	[uid]
+	);
+}
+
 //this is a testing suite, we should not be hard coding our functions with test variables
 
 async function test(){
 
 }
 
-module.exports = { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail}; 
+module.exports = { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail, createEmailToken, consumeEmailToken, verifyAccountEmail}; 

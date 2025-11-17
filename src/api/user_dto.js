@@ -7,7 +7,7 @@ const UserDTO = {
     username: '',
     email: '',
     bio: '',
-
+    verified: Boolean,
 }
 
 module.exports = {UserDTO};

@@ -2,13 +2,15 @@
 require('dotenv').config();
 const express = require('express');
 
-const { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail} = require('./password_storage.js');
+const { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail, createEmailToken, consumeEmailToken, verifyAccountEmail} = require('./password_storage.js');
 const { addQuestion, vote, answerQuestion, topQuestions, getAllQuestions } = require('./questions.js');
 const { getBio, setBio } = require('./user_bio.js');
 const { sessionMiddleware, requireAuth, getSessionUser, setSessionUser, destroySession} = require('./session.js');
-const cors = require('cors');
+const { sendAccountEmail, xorEncrypt } = require('./mail.js');
 const { UserDTO } = require('./user_dto');
 
+
+const cors = require('cors');
 
 const app = express();
 app.use(cors({
@@ -18,7 +20,6 @@ app.use(cors({
 app.use(express.json());
 app.use(sessionMiddleware());
 app.set('etag', false);
-
 
 
 
@@ -157,6 +158,69 @@ app.post('/api/updatebio', async (req, res) =>{
   } catch (e) {
     console.log('update bio failed');
     return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
+  }
+});
+
+
+app.post('/api/verify-email', async (req, res) =>{
+  console.log('verify email called');
+  //first, ensure user is signed in
+  const uid = getSessionUser(req);
+  console.log(`uid is ${uid}`);
+  if(!uid){
+    return res.status(401).json({ error: 'Not logged in' });
+  };
+  //then, get the current users email address
+  const user = await fetchUserbyUID(uid);
+  email = user.email
+  username = user.username
+
+  try {
+
+    const token = await createEmailToken(uid);
+
+    const link = `http://localhost:5173/api/verify-email?token=${token}`
+
+    await sendAccountEmail({
+      address: email,
+      link: link,
+    });
+    
+    return res.json({ ok: true });
+  }
+  catch (e){
+    console.error('verify-email error', e);
+    return res.status(500).json({ error: 'Could not send verification email' });
+  }
+});
+
+app.get('/api/verify-email', async (req, res) => {
+  const { token } = req.query;
+  if (!token) {
+    return res.status(400).json({ error: 'Missing token' });
+  }
+
+  try {
+    const uid = await consumeEmailToken(token);
+    if (!userId) {
+      return res.status(400).json({ error: 'Invalid or expired token' });
+    }
+
+    // mark user as verified
+    // await db.query(
+    //   'UPDATE users SET email_verified = 1 WHERE id = ?',
+    //   [userId]
+    // ); 
+    //we do this in password_storage now
+    verifyAccountEmail(uid);
+
+    console.log(`account ${uid} verified!`);
+    return res.redirect(`http://localhost:5173/profile`)
+    // return res.json({ ok: true });
+
+  } catch (e) {
+    console.error('confirm verify-email error', e);
+    return res.status(500).json({ error: 'Internal error' });
   }
 });
 
