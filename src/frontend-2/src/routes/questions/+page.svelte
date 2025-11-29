@@ -100,6 +100,7 @@
 	<p>No results found.</p>
 {/if}
 
+<!-- TODO: Move answering question to a separate page/popup (allows for better control over (potential) titling, category selection, etc.) -->
 
 {#if user}
   <form method="POST">
