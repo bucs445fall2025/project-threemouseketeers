@@ -1,0 +1,39 @@
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  bio VARCHAR(255) DEFAULT 'No information given.',
+  verified INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS questions (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	question VARCHAR(255) NOT NULL,
+	username VARCHAR(50) NOT NULL,
+	votes INT DEFAULT 0,
+	num_answers INT DEFAULT 0,
+	accepted_answer_id INT DEFAULT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FULLTEXT(question)
+);
+-- TODO: add tables for question topics, media
+
+CREATE TABLE IF NOT EXISTS answers (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	question_id INT NOT NULL,
+	answer VARCHAR(255) NOT NULL,
+	username VARCHAR(50) NOT NULL,
+	votes INT DEFAULT 0,
+	accepted_answer BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE IF NOT EXISTS email_tokens (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	user_id INT NOT NULL,
+	token VARCHAR(128) NOT NULL UNIQUE,
+	expires_at DATETIME NOT NULL,
+	used TINYINT(1) NOT NULL DEFAULT 0,
+	FOREIGN KEY (user_id) REFERENCES users(id)
+)
