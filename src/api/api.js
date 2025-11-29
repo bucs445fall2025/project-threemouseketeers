@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 
 const { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail, createEmailToken, consumeEmailToken, verifyAccountEmail} = require('./password_storage.js');
-const { addQuestion, vote, answerQuestion, topQuestions, getAllQuestions } = require('./questions.js');
+const { addQuestion, vote, answerQuestion, topQuestions, getAllQuestions, searchQuestions } = require('./questions.js');
 const { getBio, setBio } = require('./user_bio.js');
 const { sessionMiddleware, requireAuth, getSessionUser, setSessionUser, destroySession} = require('./session.js');
 const { sendAccountEmail, xorEncrypt } = require('./mail.js');
@@ -262,8 +262,6 @@ app.get('/api/allquestions', async (req, res) => {
 
   const allQuestionsResult = await getAllQuestions(1);
 
-  console.log("returned from questions.js = ", allQuestionsResult);
-
   res.json({ ok: true, allQuestionsResult});
 });
 
@@ -323,6 +321,28 @@ app.post('/api/voteanswer', async (req, res) => {
     return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
   }
 })
+
+app.post('/api/searchquestions', async (req, res) => {
+  console.log("Search questions requested");
+
+  try {
+    const { query } = req.body || {};
+    if (!query) {
+      console.log("search query missing");
+      return res.status(400).json({ error: "Search query required" });
+    }
+
+    const results = await searchQuestions(query);
+    console.log("Search successful");
+
+    return res.status(200).json({ ok: true, results });
+
+  } catch (e) {
+    console.log("Search failed:", e);
+    return res.status(500).json({ error: e.message || "Internal error" });
+  }
+});
+
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Bridge listening on :${PORT}`);

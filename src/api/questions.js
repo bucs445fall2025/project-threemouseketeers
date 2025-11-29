@@ -166,8 +166,74 @@ async function getAllQuestions(numRows) {
 
 }
 
+async function searchQuestions(query) {
+  if (!query) {
+    const err = new Error("Search query is empty.");
+    err.status = 400;
+    throw err;
+  }
+
+  // Get questions + answers in one join
+  const [rows] = await pool.execute(`
+    SELECT 
+      q.id AS question_id,
+      q.question,
+      q.username AS question_user,
+      q.votes AS question_votes,
+      q.num_answers,
+      q.accepted_answer_id,
+      q.created_at,
+      a.id AS answer_id,
+      a.answer,
+      a.username AS answer_user,
+      a.votes AS answer_votes,
+      a.accepted_answer
+    FROM questions q
+    LEFT JOIN answers a ON q.id = a.question_id
+    WHERE MATCH(q.question) AGAINST(? IN NATURAL LANGUAGE MODE)
+    ORDER BY q.votes DESC, a.votes DESC
+  `, [query]);
+
+  // Group answers under each question
+  const questionsMap = new Map();
+
+  for (const row of rows) {
+    if (!questionsMap.has(row.question_id)) {
+      questionsMap.set(row.question_id, {
+        id: row.question_id,
+        question: row.question,
+        username: row.question_user,
+        votes: row.question_votes,
+        num_answers: row.num_answers,
+        accepted_answer_id: row.accepted_answer_id,
+        created_at: row.created_at,
+        answers: []
+      });
+    }
+
+    if (row.answer_id) {
+      questionsMap.get(row.question_id).answers.push({
+        id: row.answer_id,
+        answer: row.answer,
+        username: row.answer_user,
+        votes: row.answer_votes,
+        accepted: !!row.accepted_answer
+      });
+    }
+  }
+
+  return Array.from(questionsMap.values());
+}
+
+
+
 async function test(){
 	//testing suite not implemented
 }
 
-module.exports = { addQuestion, vote, answerQuestion, topQuestions, getAllQuestions };
+module.exports = { addQuestion, 
+                   vote, 
+                   answerQuestion, 
+                   topQuestions, 
+                   getAllQuestions, 
+                   searchQuestions };

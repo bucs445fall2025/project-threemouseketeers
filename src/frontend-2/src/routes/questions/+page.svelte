@@ -3,6 +3,8 @@
 
   export let data;
 
+  let query = "";
+
   const user = data.user;
 
   let questions = data.questions;
@@ -49,9 +51,55 @@
     }
   }
 
+  let loading = false;
+	let error = "";
+
+  async function search() {
+		if (!query.trim()) return;
+
+    loading = true
+		error = "";
+
+        try {
+            const res = await fetch('/api/searchquestions', {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ query })
+            });
+
+            const data = await res.json();
+            questions = data.results || [];
+
+        } catch (e) {
+            error = e.message;
+        } finally {
+            loading = false;
+        }
+	}
+
 </script>
 
 <h1>Questions and Answers</h1>
+
+<div class="search">
+	<input
+		type="text"
+		bind:value={query}
+		placeholder="Search questions…"
+		on:keydown={(e) => e.key === 'Enter' && search()}
+	/>
+
+	<button on:click={search}>Search</button>
+</div>
+
+{#if loading}
+	<p>Searching…</p>
+{:else if error}
+	<p class="error">{error}</p>
+{:else if questions.length === 0 && query}
+	<p>No results found.</p>
+{/if}
+
 
 {#if user}
   <form method="POST">
