@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS questions (
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FULLTEXT(question)
 );
+-- TODO: add tables for question topics, media
 
 CREATE TABLE IF NOT EXISTS answers (
 	id INT AUTO_INCREMENT PRIMARY KEY,
