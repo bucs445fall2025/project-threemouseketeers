@@ -3,8 +3,6 @@
 
   export let data;
 
-  let query = "";
-
   const user = data.user;
 
   const topics = [
@@ -22,36 +20,53 @@
 
   let questions = data.questions;
 
+  /**
+   * @brief Function that gets called when a question is asked
+   * 
+   * Calls the API endpoint and, if successful, adds the question 
+   * to the database
+   * 
+   * @note there is an issue where the question is not immediately reflected
+   * on the page after asking and requires a refresh
+   */
   async function submitQuestion() {
-  if (!askQuestionText.trim() || !selectedTopic) return;
+    if (!askQuestionText.trim() || !selectedTopic) return;
 
-  try {
-    const res = await fetch('/api/askquestion', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: user.username,
-        question: askQuestionText,
-        topic_id: selectedTopic
-      })
-    });
+    try {
+      const res = await fetch('/api/askquestion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: user.username,
+          question: askQuestionText,
+          topic_id: selectedTopic
+        })
+      });
 
-    const data = await res.json();
-    if (res.ok) {
-      questions = [data, ...questions]; // add new question locally
-      showAskModal = false;
-      askQuestionText = '';
-      selectedTopic = '';
+      const data = await res.json();
+      if (res.ok) {
+        questions = [data, ...questions]; // add new question locally
+        showAskModal = false;
+        askQuestionText = '';
+        selectedTopic = '';
 
-    } else {
-      console.error(data.error);
+      } else {
+        console.error(data.error);
+      }
+    } catch (err) {
+      console.error(err);
     }
-  } catch (err) {
-    console.error(err);
   }
-}
 
 
+  /**
+   * @brief function that gets called when the vote button is pressed for an answer
+   * 
+   * Parameters are encapsulated by the list item and pass them here
+   * 
+   * @param questionId the id of the associated question
+   * @param answerId the id of the answer to vote for
+   */
   async function voteAnswer(questionId, answerId) {
     try {
       const res = await fetch(`/api/voteanswer`, {
@@ -96,7 +111,14 @@
 
   let loading = false;
 	let error = "";
+  let query = "";
 
+  /**
+   * @brief calls the API search endpoint with the associated keyword (query, since
+   * it's a search bar)
+   * 
+   * @returns by updating the questions on the page to be only those matching the keywords
+   */
   async function search() {
 		if (!query.trim()) return;
 
@@ -123,6 +145,9 @@
   let pageSelectedTopic = "all";
   let filteredQuestions = questions;
 
+  /**
+   * @brief filters the questions on-screen by the selected topic
+   */
   function filterByTopic() {
     if (pageSelectedTopic === "all") {
       filteredQuestions = questions;

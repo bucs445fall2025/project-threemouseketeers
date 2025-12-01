@@ -3,11 +3,12 @@ import { fail } from '@sveltejs/kit';
 const API_BASE = 'http://api:8080';
 const API_KEY = '';
 
-/*export function load({ locals }) {
-  if (!locals.user) throw redirect(302, '/log-in');
-  return { user: locals.user }; // sent to page as props
-}*/
-
+/** 
+ * @brief form actions that listen to the forms on profile/+page.svelte
+ * 
+ * When you submit a form with the associated action, it calls here. These
+ * are just calls to the API with the necessary data from the form. 
+ */
 export const actions = {
   updateBio: async ({ request, fetch }) => {
     console.log('update bio requested');
@@ -51,7 +52,6 @@ export const actions = {
 
     } catch (err) {
       console.error('Logout request failed:', err);
-      // Optionally handle errors, but don’t block redirect
     }
 
     // Redirect whether or not API call succeeded

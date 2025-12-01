@@ -3,6 +3,12 @@ import { fail } from '@sveltejs/kit';
 const API_BASE = 'http://api:8080';
 const API_KEY = '';
 
+/** 
+ * @brief form actions that listen to the forms on questions/+page.svelte
+ * 
+ * When you submit a form with the associated action, it calls here. These
+ * are just calls to the API with the necessary data from the form. 
+ */
 export const actions = {
   askQuestion: async ({ request, fetch }) => {
     console.log('asking question requested');

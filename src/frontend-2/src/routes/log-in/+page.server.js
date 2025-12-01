@@ -1,11 +1,14 @@
 import { fail } from '@sveltejs/kit';
-// import { env } from '$env/static/private';
 
-// const API_BASE = env.API_BASE || 'http://api:8080';
-// const API_KEY = env.API_KEY || '';
 const API_BASE = 'http://api:8080';
 const API_KEY = '';
 
+/** 
+ * @brief form actions that listen to the forms on log-in/+page.svelte
+ * 
+ * When you submit a form with the associated action, it calls here. This
+ * is just a call to the API with the necessary data from the form. 
+ */
 export const actions = {
   logIn: async ({ request, cookies }) => {
     const formData = await request.formData();
@@ -29,13 +32,6 @@ export const actions = {
     }
 
     const data = await res.json().catch(() => ({}));
-    // cookies.set('jwt', data.token, {
-    //   path: '/',
-    //   httpOnly: true,
-    //   sameSite: 'lax',
-    //   secure: false,  // true in production with HTTPS
-    //   maxAge: 60 * 60 * 24 // 1 day
-    // });
 
     return { success: true };
   }

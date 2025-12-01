@@ -9,6 +9,14 @@
   let deleting = false;
   let error = "";
 
+  /**
+   * @brief function to delete an account when the button is pressed
+   * 
+   * Removes the session information and deletes the user entry from the database. This will
+   * not remove the users questions
+   * 
+   * @returns a redirect to the home page if successful
+   */
   async function deleteAccount() {
     deleting = true;
     error = "";

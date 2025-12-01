@@ -6,6 +6,12 @@ import { fail } from '@sveltejs/kit';
 const API_BASE = 'http://api:8080';
 const API_KEY = '';
 
+/** 
+ * @brief form actions that listen to the forms on create-account/+page.svelte
+ * 
+ * When you submit a form with the associated action, it calls here. This
+ * is just a call to the API with the necessary data from the form. 
+ */
 export const actions = {
   signUp: async ({ request, fetch }) => {
     console.log('sign up requested');

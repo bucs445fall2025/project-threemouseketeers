@@ -8,6 +8,16 @@
   let password = '';
   let error = '';
 
+  /**
+   * @brief function to call the API to log in the user with the associated data.
+   * 
+   * @returns A redirect if successful to the profile page
+   * @returns 400 if the form is not fully filled out
+   * @returns 401 if the email and password do not match a registered account
+   * @returns 500 for an internal server error
+   * 
+   * @param e the form data
+   */
   async function onSubmit(e) {
     e.preventDefault();
     const res = await api('/login', {
@@ -15,6 +25,10 @@
       headers: {'content-type':'application/json'},
       body: JSON.stringify({email, password})
     });
+    if (res.status === 400) {
+      form = { apiError: 'Please fill out all fields.' };
+      return;
+    }
     if (res.status === 401) {
       // specific feedback for wrong credentials
       form = { apiError: 'Incorrect email or password.' };

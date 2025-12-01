@@ -10,6 +10,16 @@
   let password = '';
   let error = '';
 
+  /**
+   * @brief function to call the API to create a user with the associated data.
+   * 
+   * @returns A redirect if successful
+   * @returns 400 if the form is not fully filled out
+   * @returns 409 if the email is already associated with an account
+   * @returns 500 for an internal server error
+   * 
+   * @param e the form data
+   */
   async function onSubmit(e) {
     e.preventDefault();
     const res = await api('/signup', {
