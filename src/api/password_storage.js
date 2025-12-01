@@ -24,13 +24,6 @@ const pool = mysql.createPool({
 });
 
 
-
-//Try creating new user
-const test_username = 'TestUser13';
-const test_email = 'test13@test.edu';
-const test_pw = 'hunter2';
-const saltRounds = 10;
-
 /**
  * @brief Checks whether a username already exists in the users table.
  * 

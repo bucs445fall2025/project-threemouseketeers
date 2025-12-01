@@ -4,7 +4,8 @@
   "description": "Store username/email/password combo",
   "main": "password_storage.js",
   "scripts": {
-    "start": "node api.js"
+    "start": "node api.js",
+    "test": "node test.js"
   },
   "dependencies": {
     "bcrypt": "6.0.0",
@@ -21,5 +22,8 @@
     "passport": "0.7.0",
     "unique-username-generator": "^1.5.1"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "supertest": "^7.1.4"
+  }
 }
