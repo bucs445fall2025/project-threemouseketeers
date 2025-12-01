@@ -37,8 +37,6 @@ INSERT INTO topics (name) VALUES
 ('sports'),
 ('logistics');
 
--- TODO: add tables for media
-
 CREATE TABLE IF NOT EXISTS answers (
 	id INT AUTO_INCREMENT PRIMARY KEY,
 	question_id INT NOT NULL,
