@@ -5,6 +5,7 @@
   export let data;
 
   import { page } from '$app/stores'; // This gets info about the URL
+  import "../style.css";
 </script>
 
 <svelte:head>
@@ -18,18 +19,9 @@
   </ul>
   <div class="user-bar">
     {#if !data.user}
-      {#if $page.url.pathname === '/log-in'}
-        <!-- show Sign Up when on login page -->
-        Don't have an account? <a href="/create-account">Sign Up</a>
-
-      {:else if $page.url.pathname === '/create-account'}
-        <!-- show Log In when on signup page -->
-        Already have an account? <a href="/log-in">Log In</a>
-
-      {:else}
-        <!-- show both for all other pages -->
+      {#if $page.url.pathname !== '/log-in' &&  $page.url.pathname !== '/create-account'}
         <a href="/log-in">Log In</a>
-        <a href="/create-account">Sign Up</a>
+        <a href="/create-account">Sign Up</a>        
       {/if}
     {:else}
       <a href="/profile">My Profile</a>

@@ -38,6 +38,8 @@ Then, it should be as simple as running ```docker compose up``` to run the proje
 
 ## Built With
 * [requests](https://docs.python-requests.org/en/latest/user/quickstart/#make-a-request) - request for humans
+* [SvelteKit]()
+* [MySQL]()
 
 ## License
 We are using the MIT license. See `LICENSE.md` for more.

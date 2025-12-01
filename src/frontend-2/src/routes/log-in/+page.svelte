@@ -15,6 +15,11 @@
       headers: {'content-type':'application/json'},
       body: JSON.stringify({email, password})
     });
+    if (res.status === 401) {
+      // specific feedback for wrong credentials
+      form = { apiError: 'Incorrect email or password.' };
+      return;
+    }
     if(!res.ok) {
       error = 'Invalid credentials';
       return;
@@ -29,6 +34,7 @@
 </script>
 
 <form on:submit|preventDefault={onSubmit}>
+  <h1>Log In</h1>
   <input bind:value={email} name="email" type="email" placeholder="email" />
   <input bind:value={password} name="password" type="password" placeholder="password"/>
   <button type="submit">Log In</button>
@@ -42,4 +48,6 @@
   {#if form?.success}
     <p style="color:green">Signed in!</p>
   {/if}
+
+  Don't have an account? <a href="/create-account">Sign Up</a>
 </form>

@@ -17,19 +17,26 @@
       headers: {'content-type':'application/json'},
       body: JSON.stringify({username, email, password})
     });
+    if (res.status === 400) {
+      form = { apiError: 'Please fill out all fields.' };
+      return;
+    }
+    if (res.status === 409) {
+      // conflict
+      form = { apiError: 'Email is already in use.' };
+      return;
+    }
     if(!res.ok) {
       error = 'Sign up failed, please try again later';
       return;
     }
-
-    // await hydrateUser(); //pulls /api/me but with the new cookie
-    // goto('/profile', { replaceState: true, reload: true });
 
     window.location.href = '/profile';
   }
 </script>
 
 <form on:submit|preventDefault={onSubmit}>
+  <h1>Sign Up</h1>
   <input bind:value={username} name="username" type="text" placeholder="Username" />
   <input bind:value={email} name="email" type="email" placeholder="Email" />
   <input bind:value={password} name="password" type="password" placeholder="Password" />
@@ -44,4 +51,6 @@
   {#if form?.success}
     <p style="color:green">Signed Up!</p>
   {/if}
+
+  Already have an account? <a href="/log-in">Log In</a>
 </form>

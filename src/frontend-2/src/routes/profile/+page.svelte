@@ -39,97 +39,183 @@
 
 </script>
 
-<form method="POST">
-  <button
-    type="submit"
-    formaction="?/logout"
-    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-  >
-    Log out
-  </button>
-</form>
-
-<button class="delete-btn" on:click={() => showDeleteModal = true}>
-  Delete Account
-</button>
-
-{#if showDeleteModal}
-  <div class="modal-backdrop" on:click={() => showDeleteModal = false}></div>
-  
-  <div class="modal">
-    <h2>Confirm Account Deletion</h2>
-    <p>Are you sure you want to delete your account? This action cannot be undone.</p>
-
-    <div class="buttons">
-      <button type="button" on:click={() => showDeleteModal = false}>
-        Cancel
-      </button>
-      <button type="button" on:click={deleteAccount} disabled={deleting}>
-        {#if deleting}Deleting…{:else}Delete Account{/if}
-      </button>
-    </div>
-
-    {#if error}
-      <p class="error">{error}</p>
-    {/if}
-  </div>
-{/if}
-
-
 {#if data.user}
-  <h1>Hello, {data.user.username}</h1>
-  <p>{data.user.bio}</p>
+  <section class="profile-card">
+    <h1>Hello, {data.user.username}</h1>
+    <p class="bio">{data.user.bio || "No bio set yet."}</p>
 
-  <form method="POST">
-    <input name="newBio" type="text" placeholder="New Bio"/>
-    <input name="username" type="hidden" value={data.user.username}/>
-    <button
-      type="submit"
-      formaction="?/updateBio"
-    >
-      Update Bio
-    </button>
+    <form method="POST" class="update-bio-form">
+      <input name="newBio" type="text" placeholder="New Bio" />
+      <input name="username" type="hidden" value={data.user.username} />
+      <button type="submit" formaction="?/updateBio">Update Bio</button>
 
-    {#if form?.missing}
-      <p style="color:red">Please fill in all fields.</p>
-    {/if}
-    {#if form?.apiError}
-      <p style="color:red">{form.apiError}</p>
-    {/if}
-    {#if form?.success}
-      <p style="color:green">User bio updated!</p>
-    {/if}
-  </form>
-
-  {#if data.user.verified === 0}
-    <form method="POST">
-      <button
-        type="submit"
-        formaction="?/verify"
-      >
-        Verify Email
-      </button>
+      {#if form?.missing}
+        <p class="feedback error">Please fill in all fields.</p>
+      {/if}
+      {#if form?.apiError}
+        <p class="feedback error">{form.apiError}</p>
+      {/if}
+      {#if form?.success}
+        <p class="feedback success">User bio updated!</p>
+      {/if}
     </form>
-  {/if}
 
+    {#if data.user.verified === 0}
+      <form method="POST">
+        <button type="submit" class="verify-btn" formaction="?/verify">Verify Email</button>
+      </form>
+    {/if}
+
+    <div class="account-actions">
+      <form method="POST">
+        <button type="submit" class="logout-btn" formaction="?/logout">Log Out</button>
+      </form>
+      <button class="delete-btn" on:click={() => showDeleteModal = true}>Delete Account</button>
+    </div>
+  </section>
+
+  {#if showDeleteModal}
+    <div class="modal-backdrop" on:click={() => showDeleteModal = false}></div>
+
+    <div class="modal">
+      <h2>Confirm Account Deletion</h2>
+      <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+
+      <div class="buttons">
+        <button type="button" class="cancel-btn" on:click={() => showDeleteModal = false}>
+          Cancel
+        </button>
+        <button type="button" class="delete-confirm-btn" on:click={deleteAccount} disabled={deleting}>
+          {#if deleting}Deleting…{:else}Delete Account{/if}
+        </button>
+      </div>
+
+      {#if error}
+        <p class="feedback error">{error}</p>
+      {/if}
+    </div>
+  {/if}
 {:else}
-  <h1>Loading…</h1> <!-- This should really never happen -->
+  <h1>Loading…</h1>
 {/if}
 
 <style>
-  .delete-btn {
-    padding: 0.5rem 1rem;
-    background: #e53e3e;
-    color: white;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
+  /* Profile card */
+  .profile-card {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
   }
 
-  .delete-btn:hover {
+  .profile-card h1 {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .bio {
+    font-size: 1rem;
+    color: #555;
+    min-height: 1.5rem;
+  }
+
+  /* Form inputs */
+  input[type="text"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  button {
+    cursor: pointer;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    transition: background 0.2s;
+  }
+
+  /* Specific buttons */
+  .logout-btn {
+    background: #e53e3e;
+    color: white;
+  }
+  .logout-btn:hover {
     background: #c53030;
   }
 
+  .delete-btn {
+    background: #f6adad;
+    color: #721c24;
+  }
+  .delete-btn:hover {
+    background: #f56565;
+  }
+
+  .delete-confirm-btn {
+    background: #e53e3e;
+    color: white;
+  }
+  .delete-confirm-btn:hover {
+    background: #c53030;
+  }
+
+  .cancel-btn {
+    background: #e2e8f0;
+    color: #333;
+  }
+  .cancel-btn:hover {
+    background: #cbd5e0;
+  }
+
+  .verify-btn {
+    background: #3182ce;
+    color: white;
+  }
+  .verify-btn:hover {
+    background: #2b6cb0;
+  }
+
+  /* Feedback messages */
+  .feedback {
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+  }
+  .feedback.error {
+    color: #e53e3e;
+  }
+  .feedback.success {
+    color: #38a169;
+  }
+
+  /* Form submit buttons */
+  .update-bio-form button {
+    background: #3182ce;
+    color: white;
+    width: 100%;
+  }
+  .update-bio-form button:hover {
+    background: #2b6cb0;
+  }
+
+  /* Account actions container */
+  .account-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+
+  /* Modal */
   .modal-backdrop {
     position: fixed;
     inset: 0;
@@ -146,9 +232,17 @@
     padding: 2rem;
     width: 90%;
     max-width: 400px;
-    border-radius: 8px;
+    border-radius: 12px;
     z-index: 21;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .modal h2 {
+    margin: 0;
+    font-size: 1.5rem;
   }
 
   .buttons {
@@ -156,10 +250,5 @@
     justify-content: flex-end;
     gap: 1rem;
     margin-top: 1rem;
-  }
-
-  .error {
-    margin-top: 0.5rem;
-    color: red;
   }
 </style>
