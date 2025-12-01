@@ -20,11 +20,11 @@ VisitU provides the (skeleton) of a forum where prospective students can get rea
   
 ### Prerequisites
 * [Docker](https://www.docker.com/)
-* <<any additional software. Be specific about versions.>>
 If running outside of Docker:
 * Node Alpine 3.21
 * MySQL 8.0
 * SvelteKit 2.49.0
+* NginX 1.29.3
 
 ### Installing
 Rename the `.env-template` to just `.env` and fill in the required fields with the specifics of your database and session information. 
@@ -34,16 +34,19 @@ Rename the `.env-template` to just `.env` and fill in the required fields with t
 * `MYSQL_PASSWORD` -- Password for the above MySQL user
 * `SESSION_SECRET` -- A string used by `express-session` (a package installed with `npm install`, automatically installed when running in docker) to sign session cookies
 * `SESSION_COOKIE_NAME` -- The name of the cookie that will be sent to the browser to track sessions
-Then, it should be as simple as running ```docker compose up``` to run the project. 
+
+Then, it should be as simple as running ```docker compose up``` to run the project. This automatically handles `npm install` and other setup commands, like running the init.sql script to set up the database and launching the frontend. To run outside of docker, you can run all of these manually, following the commands listed in the dockerfiles.
 
 ## Built With
 * [requests](https://docs.python-requests.org/en/latest/user/quickstart/#make-a-request) - request for humans
-* [SvelteKit]()
-* [MySQL]()
+* [SvelteKit](https://svelte.dev/)
+* [MySQL](https://www.mysql.com/)
+* [Node](https://nodejs.org/en)
+* [NginX](https://nginx.org/)
 
 ## License
 We are using the MIT license. See `LICENSE.md` for more.
 
 ## Acknowledgments
-* Reddit for providing the structural basis of the forum design
-* Professor Moore for his continued instruction and support
+* Reddit for providing the structural basis of the forum design.
+* Professor Moore and class staff for their continued instruction and support.

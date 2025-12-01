@@ -268,44 +268,44 @@
 <style>
   /* Topic bar */
   .topic-bar {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;       /* allows horizontal scroll if too many buttons */
-  padding: 0.5rem 0;
-  scrollbar-width: thin;  /* optional: make scrollbar less obtrusive in Firefox */
-}
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    scrollbar-width: thin;
+  }
 
-.topic-bar::-webkit-scrollbar {
-  height: 6px;            /* thin horizontal scrollbar */
-}
+  .topic-bar::-webkit-scrollbar {
+    height: 6px;
+  }
 
-.topic-bar::-webkit-scrollbar-thumb {
-  background-color: #ccc;
-  border-radius: 3px;
-}
+  .topic-bar::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+  }
 
-.topic-bar button {
-  color: grey;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #f0f0f0;
-  cursor: pointer;
-  white-space: nowrap;    /* prevent text wrapping */
-  transition: all 0.2s;
-}
+  .topic-bar button {
+    color: grey;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #f0f0f0;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
 
-.topic-bar button:hover {
-  background: green;
-  color: white;
-  border-color: #3182ce;
-}
+  .topic-bar button:hover {
+    background: green;
+    color: white;
+    border-color: #3182ce;
+  }
 
-.topic-bar button.selected {
-  background: darkgreen;
-  color: white;
-  border-color: #3182ce;
-}
+  .topic-bar button.selected {
+    background: darkgreen;
+    color: white;
+    border-color: #3182ce;
+  }
   /* Search */
   .search-bar {
   display: flex;
@@ -315,7 +315,7 @@
 }
 
 .search-bar input[type="text"] {
-  flex: 1;                  /* makes input take up remaining space */
+  flex: 1;
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
   border-radius: 6px;
@@ -354,16 +354,16 @@
 }
 
 .answer-content {
-  display: inline-flex !important; /* force inline layout */
+  display: inline-flex !important;
   align-items: center !important;
-  gap: 0.5rem !important;          /* space between text and button */
+  gap: 0.5rem !important;
 }
 
 .vote-btn {
-  all: unset;                    /* remove all inherited styles */
+  all: unset;
   display: inline-block !important;
   padding: 0.25rem 0.5rem !important;
-  font-size: 0.75rem !important; /* small font */
+  font-size: 0.75rem !important;
   border-radius: 4px !important;
   border: 1px solid #3182ce !important;
   background: #fff !important;
@@ -385,84 +385,84 @@
   }
 
   .answer-form-large {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;               /* space between textarea and button */
-  margin-top: 0.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
 
-}
+  }
 
-.answer-label {
-  font-size: 1.1rem;          /* slightly larger text */
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
+  .answer-label {
+    font-size: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
 
-.answer-label textarea {
-  flex: 1;                    /* takes up remaining space */
-  min-height: 2rem;           /* single-line feel */
-  padding: 0.5rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  resize: vertical;             /* allow vertical resizing */
-}
+  .answer-label textarea {
+    flex: 1;
+    min-height: 2rem;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    resize: vertical;
+  }
 
-.small-btn {
-  padding: 0.35rem 0.7rem;  
-  font-size: 0.85rem;
-  border-radius: 6px;
-  border: none;
-  background: darkgreen;
-  color: white;
-  cursor: pointer;
-  white-space: nowrap;
-  align-self: flex-end;
-}
+  .small-btn {
+    padding: 0.35rem 0.7rem;  
+    font-size: 0.85rem;
+    border-radius: 6px;
+    border: none;
+    background: darkgreen;
+    color: white;
+    cursor: pointer;
+    white-space: nowrap;
+    align-self: flex-end;
+  }
 
-.small-btn:hover {
-  background: rgb(14, 132, 14);
-}
+  .small-btn:hover {
+    background: rgb(14, 132, 14);
+  }
 
-.small-btn-search {
-  width: fit-content;
-  padding: 0.3rem 0.6rem;      /* smaller button */
-  font-size: 0.85rem;
-  border-radius: 6px;
-  border: none;
-  background: darkgreen;
-  color: white;
-  cursor: pointer;
-}
+  .small-btn-search {
+    width: fit-content;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    border: none;
+    background: darkgreen;
+    color: white;
+    cursor: pointer;
+  }
 
-.small-btn-search:hover {
-  background: rgb(14, 132, 14);
-}
+  .small-btn-search:hover {
+    background: rgb(14, 132, 14);
+  }
 
   /* Ask button */
   .ask-btn-container {
-  display: flex;
-  justify-content: center;   /* centers horizontally */
-  margin-top: 2rem;          /* distance from top of page/content */
-  margin-bottom: 1.5rem;     /* spacing below button */
-}
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+  }
 
-.ask-btn {
-  width: 20%;
-  padding: 0.6rem 1.2rem;
-  background: #38a169;
-  color: white;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.2s;
-}
+  .ask-btn {
+    width: 20%;
+    padding: 0.6rem 1.2rem;
+    background: #38a169;
+    color: white;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+  }
 
-.ask-btn:hover {
-  background: #2f855a;
-}
+  .ask-btn:hover {
+    background: #2f855a;
+  }
 
   /* Modal */
   .modal-backdrop {

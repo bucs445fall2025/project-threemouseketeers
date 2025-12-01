@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# this bash script runs through several tests to ensure all the database tables are healthy and instantiated as needed
+
 # === LOAD ENVIRONMENT VARIABLES === THIS IS NOW HANDLED IN THE COMPOSE FILE
 # if [[ -f "./.env" ]]; then
 #   # Export all variables from .env

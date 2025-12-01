@@ -9,7 +9,6 @@ const { sessionMiddleware, requireAuth, getSessionUser, setSessionUser, destroyS
 const { sendAccountEmail, xorEncrypt } = require('./mail.js');
 const { UserDTO } = require('./user_dto');
 
-
 const cors = require('cors');
 
 const app = express();
@@ -21,22 +20,27 @@ app.use(express.json());
 app.use(sessionMiddleware());
 app.set('etag', false);
 
-
-
-
 const PORT = Number(process.env.PORT || 8080);
 const API_KEY = process.env.API_KEY || null;
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret'; // TODO: Fix these
 
 
-// optional: simple API key gate
+// simple API key gate
 app.use((req, res, next) => {
   if (!API_KEY) return next();
   if (req.header('x-api-key') === API_KEY) return next();
   return res.status(401).json({ error: 'Unauthorized' });
 });
 
-// health
+/**
+ * @brief Health check endpoint.
+ *
+ * Performs a ping to the database to ensure backend connectivity.
+ *
+ * @route GET /health
+ * @returns 200 OK if the backend is healthy.
+ * @returns 500 Internal Server Error if the database cannot be reached.
+ */
 app.get('/health', async (_req, res) => {
   try {
     await dbPing(); //pings database, returns 500 if can't connect to backend
@@ -46,7 +50,17 @@ app.get('/health', async (_req, res) => {
   }
 });
 
-// create user
+/**
+ * @brief Creates a new user account in the database and logs the user in.
+ *
+ * Validates required fields, creates a user record, regenerates the session,
+ * and stores the user ID in the session.
+ *
+ * @route POST /api/signup
+ * @returns 200 OK after successful signup and session creation.
+ * @returns 400 Bad Request if required fields are missing.
+ * @returns 500 Internal Server Error on database or session errors.
+ */
 app.post('/api/signup', async (req, res) => { 
   console.log('account create requested');
   try {
@@ -58,7 +72,6 @@ app.post('/api/signup', async (req, res) => {
     const result = await createUser({ username, email, password });
     console.log('account create succesful');
 
-    // TODO: Break following code (repeated in create-user) into function?
     const user = await fetchUserbyEmail(email);  //gets the userDTO so we can hydrate user info later
     
     //create/rotate server session from express-mysql-backend
@@ -86,7 +99,19 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-// login
+/**
+ * @brief Authenticates a user and creates a new session.
+ *
+ * Verifies the email/password pair, regenerates the session,
+ * and stores the user ID in the session.
+ *
+ * @route POST /api/login
+ * @body JSON { email, password }
+ * @returns 200 OK on successful login.
+ * @returns 400 Bad Request if required fields are missing.
+ * @returns 401 Unauthorized if credentials are invalid.
+ * @returns 500 Internal Server Error on server or session failures.
+ */
 app.post('/api/login', async (req, res) => {
   console.log('login requested');
   try {
@@ -125,7 +150,17 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-//fetch user bio
+/**
+ * @brief Retrieves a user's bio information.
+ *
+ * Fetches profile text associated with a given username.
+ *
+ * @route POST /api/fetchbio
+ * @body JSON { username }
+ * @returns 201 Created with bio data.
+ * @returns 400 Bad Request if username is missing.
+ * @returns 500 Internal Server Error on database failure.
+ */
 app.post('/api/fetchbio', async (req, res) =>{
   console.log('get bio requested');
   try {
@@ -143,7 +178,16 @@ app.post('/api/fetchbio', async (req, res) =>{
   }
 });
 
-//update user bio
+/**
+ * @brief Updates a user's bio.
+ *
+ * Writes new profile information for the specified username.
+ *
+ * @route POST /api/updatebio
+ * @returns 201 Created with update results.
+ * @returns 400 Bad Request if required fields are missing.
+ * @returns 500 Internal Server Error on update failure.
+ */
 app.post('/api/updatebio', async (req, res) =>{
   console.log('update bio requested');
   try {
@@ -161,7 +205,17 @@ app.post('/api/updatebio', async (req, res) =>{
   }
 });
 
-
+/**
+ * @brief Initiates the email verification process.
+ *
+ * Requires the user to be logged in. Generates a verification token,
+ * creates a link, and sends it to the user’s email.
+ *
+ * @route POST /api/verify-email
+ * @returns 200 OK if the email was sent.
+ * @returns 401 Unauthorized if not logged in.
+ * @returns 500 Internal Server Error if token creation or mail sending fails.
+ */
 app.post('/api/verify-email', async (req, res) =>{
   console.log('verify email called');
   //first, ensure user is signed in
@@ -194,6 +248,16 @@ app.post('/api/verify-email', async (req, res) =>{
   }
 });
 
+/**
+ * @brief Confirms a user's email verification by consuming a token.
+ *
+ * Marks the associated user account as verified.
+ *
+ * @route GET /api/verify-email?token=...
+ * @returns 302 Redirect to `/profile` on success.
+ * @returns 400 Bad Request if token is missing or invalid.
+ * @returns 500 Internal Server Error on verification failure.
+ */
 app.get('/api/verify-email', async (req, res) => {
   const { token } = req.query;
   if (!token) {
@@ -224,7 +288,17 @@ app.get('/api/verify-email', async (req, res) => {
   }
 });
 
-
+/**
+ * @brief Returns the currently authenticated user's profile.
+ *
+ * Fetches user data using the session user ID.
+ *
+ * @route GET /api/me
+ * @auth Required
+ * @returns 200 OK with `{ ok: true, user }`.
+ * @returns 401 Unauthorized if not logged in.
+ * @returns 404 Not Found if user cannot be retrieved.
+ */
 app.get('/api/me', async (req, res) => {
   console.log(`api/me called`)
   const uid = getSessionUser(req);
@@ -241,6 +315,14 @@ app.get('/api/me', async (req, res) => {
   res.json({ ok:true, user});
 });
 
+/**
+ * @brief Logs out the current user and destroys the session.
+ *
+ * Clears the session and removes the session cookie.
+ *
+ * @route POST /api/logout
+ * @returns 200 OK with `{ ok: true }`.
+ */
 app.post('/api/logout', async (req, res) => {
   console.log("api/logout called")
   await destroySession(req);
@@ -249,6 +331,16 @@ app.post('/api/logout', async (req, res) => {
   res.json({ ok: true});
 });
 
+/**
+ * @brief Deletes the currently authenticated user’s account.
+ *
+ * Removes the user from the database, then destroys the session.
+ *
+ * @route DELETE /api/deleteaccount
+ * @returns 200 OK with success message.
+ * @returns 401 Unauthorized if not logged in.
+ * @returns 500 Internal Server Error on deletion failure.
+ */
 app.delete('/api/deleteaccount', requireAuth, async (req, res) => {
   try {
     const userId = getSessionUser(req);
@@ -268,13 +360,28 @@ app.delete('/api/deleteaccount', requireAuth, async (req, res) => {
   }
 });
 
-
+/**
+ * @brief Returns private user data for authenticated users.
+ *
+ * Example protected route demonstrating session-based auth.
+ *
+ * @route GET /api/private/data
+ * @returns 200 OK with greeting and user object.
+ */
 app.get('/api/private/data', requireAuth, async (req, res) => {
   const uid = getSessionUser(req);
   const user = await fetchUserbyUID(uid);
   res.json({ message: `welcome, ${user?.username || 'user'}!`, user});
 });
 
+/**
+ * @brief Fetches all questions.
+ *
+ * Retrieves the full question list from the database.
+ *
+ * @route GET /api/allquestions
+ * @returns 200 OK with `{ ok: true, allQuestionsResult }`.
+ */
 app.get('/api/allquestions', async (req, res) => {
   console.log("Get all questions requested from API");
 
@@ -283,6 +390,14 @@ app.get('/api/allquestions', async (req, res) => {
   res.json({ ok: true, allQuestionsResult});
 });
 
+/**
+ * @brief Adds a new question to the system.
+ *
+ * @route POST /api/askquestion
+ * @returns 201 Created with database insert result.
+ * @returns 400 Bad Request if any required field is missing.
+ * @returns 500 Internal Server Error on failure.
+ */
 app.post('/api/askquestion', async (req, res) => {
   console.log("Ask a question requested of API");
 
@@ -304,6 +419,14 @@ app.post('/api/askquestion', async (req, res) => {
   }
 })
 
+/**
+ * @brief Submits an answer for a question.
+ *
+ * @route POST /api/answerquestion
+ * @returns 201 Created with insert result.
+ * @returns 400 Bad Request if required fields are missing.
+ * @returns 500 Internal Server Error on failure.
+ */
 app.post('/api/answerquestion', async (req, res) => {
   console.log("Answer question requested of API");
 
@@ -323,6 +446,14 @@ app.post('/api/answerquestion', async (req, res) => {
   }
 })
 
+/**
+ * @brief Casts an upvote for an answer.
+ *
+ * @route POST /api/voteanswer
+ * @returns 201 Created with vote update result.
+ * @returns 400 Bad Request if answerId is missing.
+ * @returns 500 Internal Server Error on failure.
+ */
 app.post('/api/voteanswer', async (req, res) => {
   try {
     const { answerId } = req.body || {};
@@ -340,6 +471,16 @@ app.post('/api/voteanswer', async (req, res) => {
   }
 })
 
+/**
+ * @brief Searches questions by full-text query.
+ *
+ * Returns matching questions based on the supplied query string.
+ *
+ * @route POST /api/searchquestions
+ * @returns 200 OK if successful.
+ * @returns 400 Bad Request if query is missing.
+ * @returns 500 Internal Server Error on failure.
+ */
 app.post('/api/searchquestions', async (req, res) => {
   console.log("Search questions requested");
 

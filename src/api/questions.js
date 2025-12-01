@@ -18,6 +18,20 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
+/**
+ * @brief Inserts a new question into the database
+ *
+ * Validates that the question text and topic ID are provided, then
+ * stores the question with its author and associated topic.
+ *
+ * @param {*} newQuestion The text of the question
+ * @param {*} username The username of the person asking
+ * @param {*} topicId The ID of the topic/category the question belongs to
+ * @returns An object containing { id, newQuestion, username, topicId }
+ *
+ * @throws Error(400) if the question text or topic ID is missing
+ * @throws Any MySQL error from the insert operation
+ */
 async function addQuestion(newQuestion, username, topicId) {
 	//ensure field is not blank
 	if(!newQuestion) {
@@ -39,6 +53,15 @@ async function addQuestion(newQuestion, username, topicId) {
 	return {id: result.insertId, newQuestion, username, topicId}
 }
 
+/**
+ * @brief Increments the vote counter for an answer
+ * 
+ * @param {*} answerId the ID of the answer receiving a vote
+ * @returns true if the update succeeds
+ * 
+ * @throws 404 if the answer does not exist
+ * @throws Any MySQL error during lookup or update
+ */
 async function vote(answerId) {
 	//ensure answerId exists in questions table
 	const [rows] = await pool.execute(
@@ -60,6 +83,20 @@ async function vote(answerId) {
 	return true;
 }
 
+/**
+ * @brief Submits an answer to a question.
+ *
+ * Ensures the referenced question exists, inserts a new answer, and
+ * increments the question's answer count.
+ *
+ * @param {*} questionId The ID of the question being answered
+ * @param {*} newAnswer The answer text
+ * @param {*} username The user providing the answer
+ * @returns true on success
+ *
+ * @throws 404 if the question does not exist
+ * @throws Any MySQL error during insert or update
+ */
 async function answerQuestion(questionId, newAnswer, username) {
 	//ensure questionId exists in questions table
 	const [rows] = await pool.execute(
@@ -85,6 +122,18 @@ async function answerQuestion(questionId, newAnswer, username) {
 	return true;
 }
 
+/**
+ * @brief Returns the top-voted questions above a specified vote threshold
+ *
+ * First validates that enough qualifying questions exist; if not, the
+ * result count is reduced. Then fetches questions ordered by vote count.
+ *
+ * @param {*} numRows Maximum number of questions to return
+ * @param {*} minVotes Minimum vote count required for inclusion
+ * @returns An array of question rows
+ *
+ * @note If insufficient qualifying questions exist, numRows is reduced.
+ */
 async function topQuestions(numRows, minVotes) {
 	//ensure there are enough questions with minimum amount of votes
 	const [count] = await pool.execute(
@@ -104,6 +153,15 @@ async function topQuestions(numRows, minVotes) {
 	return results;
 }
 
+/**
+ * @brief Retrieves all questions along with their topics and associated answers
+ *
+ * Performs a joined query across questions, topics, and answers tables,
+ * then aggregates answers under the appropriate question objects.
+ *
+ * @param {*} numRows Maximum number of questions to return
+ * @returns An array of question objects, each containing an answers array
+ */
 async function getAllQuestions(numRows) {
   // Get total number of questions
   const [count] = await pool.execute(
@@ -174,8 +232,14 @@ async function getAllQuestions(numRows) {
   }));
 }
 
-
-
+/**
+ * @brief Searches for question using the given keyword(s)
+ * 
+ * @param {*} query the keyword(s) to search in the FULLTEXT element of the question table
+ * @returns an array of matching question objects
+ * 
+ * @throws 400 if the query is empty
+ */
 async function searchQuestions(query) {
   if (!query) {
     const err = new Error("Search query is empty.");

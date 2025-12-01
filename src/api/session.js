@@ -4,6 +4,26 @@ require('dotenv').config();
 const session = require ('express-session');
 const MySQLStoreFactory = require ('express-mysql-session');
 
+/**
+ * @brief Creates and configures the Express session middleware using a MySQL-backed session store.
+ *
+ * This function initializes a MySQL session store (via express-mysql-session)
+ * and returns a fully configured Express session middleware. The session data
+ * is persisted in a MySQL database, with automatic table creation and periodic
+ * cleanup of expired sessions. Cookie behavior, expiration, and security settings
+ * are all controlled via environment variables with sensible fallbacks.
+ *
+ * Environment variables used:
+ * - DB_HOST: MySQL host (default: "db")
+ * - DB_PORT: MySQL port (default: 3306)
+ * - MYSQL_USER: MySQL username
+ * - MYSQL_PASSWORD: MySQL password
+ * - MYSQL_DATABASE: Database used for storing sessions (default: "projectdb")
+ * - SESSION_COOKIE_NAME: Name of the session cookie (default: "sid")
+ * - SESSION_SECRET: Secret key for signing the session ID cookie
+ *
+ * @return {Function} Configured Express middleware that manages user sessions.
+ */
 function sessionMiddleware() {
     const MySQLStore = MySQLStoreFactory(session);
 

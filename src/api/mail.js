@@ -16,6 +16,21 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+/**
+ * @brief Sends an account-verification email to a user.
+ *
+ * Uses a configured Gmail SMTP transporter to deliver a verification link.
+ * The message includes both plaintext and HTML versions.
+ *
+ * @param address The destination email address.
+ * @param link A verification URL that the user will click to confirm their account.
+ *
+ * @returns Promise<void>
+ * @throws Any SMTP, authentication, or connectivity error from nodemailer.
+ *
+ * @note Relies on a Gmail account configured in the transporter.  
+ * @note Sends from the "VisitU" no-reply identity.
+ */
 async function sendAccountEmail({ address, link }) {
     const info = await transporter.sendMail({
     from: '"VisitU" <no-reply.mail.visitu@gmail.com>',
@@ -29,29 +44,17 @@ async function sendAccountEmail({ address, link }) {
   console.log("Message sent:", info.messageId);
 }
 
-// sendMail({
-//     to:"mail@seniho.com",
-//     subject:"please confirm your ",
-//     text:"hey there, this is a test",
-//     html: "<h1> HELLO WORLD</h1>",
-// })
-// account = "mail@seniho.com"
-// link = "https://seniho.com/resume"
-// sendAccountEmail({address: account, link:link })
-
-
-// (async () => {
-//   const info = await transporter.sendMail({
-//     from: '"noreply" <mail.visitu@gmail.com>',
-//     to: "mail@seniho.com, sokuyuc1@binghamton.edu",
-//     subject: "Hello ✔",
-//     text: "Hello world?", // plain‑text body
-//     html: "<b>Hello world?</b>", // HTML body
-//   });
-
-//   console.log("Message sent:", info.messageId);
-// })();
-
+/**
+ * @brief Performs a simple XOR-based obfuscation of an email using the username as key material.
+ *
+ * Iterates over each byte of the email, XORs it with the corresponding byte
+ * of the username (cycled to match length), and encodes the result using
+ * URL-safe Base64.
+ *
+ * @param email The email string to obfuscate.
+ * @param username The username whose characters form the XOR key.
+ * @returns A URL-safe Base64 encoded string representing the XOR result.
+ */
 function xorEncrypt(email, username) {
   let out = [];
   for (let i = 0; i < email.length; i++) {

@@ -8,4 +8,4 @@
 - **MySQL** -> [mysql:latest](https://hub.docker.com/_/mysql)
 
 ## **Additional Dependencies**
-- Svelte (frontend)
+- Svelte (frontend). It is a node package, so npm install will install it for you.
