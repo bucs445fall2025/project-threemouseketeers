@@ -1,4 +1,6 @@
 <script>
+  import { Search, CirclePlus, X } from 'lucide-svelte';
+
   export let form = {};
 
   export let data;
@@ -17,6 +19,8 @@
   let askQuestionText = "";
   let selectedTopic = "";
   let showAskModal = false;
+
+  let showSearchModal = false;
 
   let questions = data.questions;
 
@@ -49,6 +53,15 @@
         showAskModal = false;
         askQuestionText = '';
         selectedTopic = '';
+
+        const res = await fetch('/api/allquestions');
+        const something = await res.json();
+
+        if (!something.ok) {
+          throw new Error('Failed to fetch questions');
+        }
+
+        filteredQuestions = something.allQuestionsResult
 
       } else {
         console.error(data.error);
@@ -120,6 +133,7 @@
    * @returns by updating the questions on the page to be only those matching the keywords
    */
   async function search() {
+    showSearchModal = false; // hide the popup
 		if (!query.trim()) return;
 
     loading = true
@@ -161,50 +175,79 @@
 
 </script>
 
-{#if user}
-  <div class="ask-btn-container">
-    <button class="ask-btn" on:click={() => showAskModal = true}>Ask a Question</button>
+<div class="main-question-container">
+  <div class="question-header">
+  <h1>Questions and Answers</h1>
+
+  <div class="top-right-buttons">
+    <button class="icon-btn" on:click={() => showSearchModal = true}>
+      <Search size={20} />
+    </button>
+
+    <div class="tooltip-wrapper">
+      <button class="icon-btn" disabled = {!data.user} on:click={() => showAskModal = true}>
+        <CirclePlus size={20} />
+        {#if !data.user}
+          <div class="tooltip">Log in to ask</div>
+        {/if}
+      </button>
+    </div>
+  </div>
   </div>
 
-  {#if showAskModal}
-    <div class="modal-backdrop" on:click={() => showAskModal = false}></div>
-    <div class="modal">
-      <h2 class="question-title">Ask a Question</h2>
-      <form method="POST">
-        <input type="hidden" name="username" value={user.username} />
 
-        <label>
-          Question:
-          <input type="text" name="question" placeholder="Type your question..." bind:value={askQuestionText} required />
-        </label>
+{#if showAskModal}
+  <div class="modal-backdrop" on:click={() => showAskModal = false}></div>
+  <div class="modal">
+    <h2 class="question-title">Ask a Question</h2>
+    <form method="POST">
+      <input type="hidden" name="username" value={user.username} />
 
-        <label>
-          Topic:
-          <select name="topic_id" bind:value={selectedTopic} required>
-            <option value="">Select a topic…</option>
-            {#each topics as t}
-              <option value={t.id}>{t.name}</option>
-            {/each}
-          </select>
-        </label>
+      <label>
+        Question:
+        <input type="text" name="question" placeholder="Type your question..." bind:value={askQuestionText} required />
+      </label>
 
-        <div class="buttons">
-          <button type="button" on:click={() => showAskModal = false} class="cancel-btn">Cancel</button>
-          <button type="button" on:click={submitQuestion} class="submit-btn">Submit</button>
-        </div>
+      <label>
+        Topic:
+        <select name="topic_id" bind:value={selectedTopic} required>
+          <option value="">Select a topic…</option>
+          {#each topics as t}
+            <option value={t.id}>{t.name}</option>
+          {/each}
+        </select>
+      </label>
 
-        {#if form?.missing}<p class="error">Please fill in all fields.</p>{/if}
-        {#if form?.apiError}<p class="error">{form.apiError}</p>{/if}
-      </form>
-    </div>
-  {/if}
-{:else}
-  <h2>Please log in to ask/answer questions</h2>
+      <div class="buttons">
+        <button type="button" on:click={() => showAskModal = false} class="cancel-btn">Cancel</button>
+        <button type="button" on:click={submitQuestion} class="submit-btn">Submit</button>
+      </div>
+
+      {#if form?.missing}<p class="error">Please fill in all fields.</p>{/if}
+      {#if form?.apiError}<p class="error">{form.apiError}</p>{/if}
+    </form>
+  </div>
 {/if}
 
-<h1>Questions and Answers</h1>
+{#if showSearchModal}
+    <div class="modal-backdrop" on:click={() => showSearchModal = false}></div>
+    <div class="modal">
+      <h2 style="color:darkgreen;"> Search by Keyword: </h2>
 
-<h2> Filter by Topic: </h2>
+      <input
+        type="text"
+        bind:value={query}
+        placeholder="Search questions…"
+        on:keydown={(e) => e.key === 'Enter' && search()}
+      />
+      <!-- <button on:click={search} class="small-btn-search">Search</button> -->
+       <div class="buttons">
+        <button type="button" on:click={() => showSearchModal = false} class="cancel-btn">Cancel</button>
+        <button type="button" on:click={search} class="submit-btn">Search</button>
+      </div>
+    </div>
+{/if}
+
 <div class="topic-bar">
   <button 
     class:selected={pageSelectedTopic === "all"} 
@@ -219,15 +262,8 @@
   {/each}
 </div>
 
-<h2> Or, Search by Keyword: </h2>
 <div class="search-bar">
-  <input
-    type="text"
-    bind:value={query}
-    placeholder="Search questions…"
-    on:keydown={(e) => e.key === 'Enter' && search()}
-  />
-  <button on:click={search} class="small-btn-search">Search</button>
+  
 </div>
 
 {#if loading}
@@ -290,7 +326,39 @@
   {/each}
 {/if}
 
+</div>
+
 <style>
+  .main-question-container {
+    padding: 2rem;
+  }
+
+  .top-right-buttons {
+    position: absolute; /* or fixed if you want it to stay on screen */
+    top: 25px;
+    right: 10px;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .icon-btn {
+    padding: 4px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: darkgreen;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .icon-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
   /* Topic bar */
   .topic-bar {
     display: flex;
@@ -312,7 +380,7 @@
   .topic-bar button {
     color: grey;
     padding: 0.5rem 1rem;
-    border-radius: 6px;
+    border-radius: 100px;
     border: 1px solid #ccc;
     background: #f0f0f0;
     cursor: pointer;
@@ -333,19 +401,52 @@
   }
   /* Search */
   .search-bar {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 1rem;
-}
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    justify-content: center;
+  }
 
-.search-bar input[type="text"] {
-  flex: 1;
-  padding: 0.5rem 0.75rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
+  .question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    position: relative; /* for tooltips to position properly */
+  }
+
+  .tooltip-wrapper {
+    position: relative;
+
+  }
+
+  .tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 110%; /* position above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    background: black;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+    pointer-events: none; /* prevents tooltip blocking hover */
+  }
+
+  .tooltip-wrapper:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .top-right-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
 
   /* Questions */
   .question {
@@ -392,7 +493,7 @@
   border-radius: 4px !important;
   border: 1px solid #3182ce !important;
   background: #fff !important;
-  color: #3182ce !important;
+  color: darkgreen !important;
   cursor: pointer !important;
   transition: all 0.2s !important;
   text-align: center !important;
@@ -410,7 +511,7 @@
   }
 
   .answer-form-large {
-    display: flex;
+    display: left;
     align-items: flex-start;
     gap: 0.5rem;
     margin-top: 0.5rem;
@@ -539,7 +640,7 @@
     border: none;
     cursor: pointer;
   }
-  .submit-btn { background: #3182ce; color: white; }
+  .submit-btn { background: darkgreen; color: white; }
   .submit-btn:hover { background: #2c5282; }
   .cancel-btn { background: #e2e8f0; color: #333; }
   .cancel-btn:hover { background: #cbd5e0; }

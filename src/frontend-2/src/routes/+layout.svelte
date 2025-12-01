@@ -17,6 +17,9 @@
     <li><a href='/'>Home</a></li>
     <li><a href='/questions'>Questions</a></li>	
   </ul>
+
+  <h2>VisitU</h2>
+
   <div class="user-bar">
     {#if !data.user}
       {#if $page.url.pathname !== '/log-in' &&  $page.url.pathname !== '/create-account'}
@@ -39,6 +42,13 @@
 		align-items: center;
 		padding: 1rem 2rem;
 	}
+
+  .navbar h2 {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+  }
 
   ul {
     list-style-type: none;
