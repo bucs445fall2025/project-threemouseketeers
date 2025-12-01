@@ -15,8 +15,8 @@ function sessionMiddleware() {
         database: process.env.MYSQL_DATABASE || 'projectdb',
         clearExpired: true,
         checkExpirationInterval: 1000 * 60 * 10, //check expiration every 10 mins
-        expiration: 1000 * 60 * 30 // expire every 30 mins
-
+        expiration: 1000 * 60 * 30, // expire every 30 mins
+        createDatabaseTable: true
     });
 
     return session ({

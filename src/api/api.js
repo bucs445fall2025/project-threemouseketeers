@@ -2,8 +2,8 @@
 require('dotenv').config();
 const express = require('express');
 
-const { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail, createEmailToken, consumeEmailToken, verifyAccountEmail} = require('./password_storage.js');
-const { addQuestion, vote, answerQuestion, topQuestions, getAllQuestions, searchQuestions } = require('./questions.js');
+const { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail, createEmailToken, consumeEmailToken, verifyAccountEmail, deleteUser } = require('./password_storage.js');
+const { addQuestion, vote, answerQuestion, topQuestions, getAllQuestions, searchQuestions, getQuestionsByTopic } = require('./questions.js');
 const { getBio, setBio } = require('./user_bio.js');
 const { sessionMiddleware, requireAuth, getSessionUser, setSessionUser, destroySession} = require('./session.js');
 const { sendAccountEmail, xorEncrypt } = require('./mail.js');
@@ -249,13 +249,31 @@ app.post('/api/logout', async (req, res) => {
   res.json({ ok: true});
 });
 
+app.delete('/api/deleteaccount', requireAuth, async (req, res) => {
+  try {
+    const userId = getSessionUser(req);
+    if (!userId) {
+      return res.status(401).json({ error: 'Not logged in' });
+    }
+
+    await deleteUser(userId);
+
+    // Destroy session to log them out
+    await destroySession(req);
+
+    return res.status(200).json({ success: true, message: 'Account deleted and logged out' });
+  } catch (err) {
+    console.error('Error deleting account:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 app.get('/api/private/data', requireAuth, async (req, res) => {
   const uid = getSessionUser(req);
   const user = await fetchUserbyUID(uid);
   res.json({ message: `welcome, ${user?.username || 'user'}!`, user});
 });
-
-// TODO: Rename the routes to /api/question/___ 
 
 app.get('/api/allquestions', async (req, res) => {
   console.log("Get all questions requested from API");
@@ -269,15 +287,15 @@ app.post('/api/askquestion', async (req, res) => {
   console.log("Ask a question requested of API");
 
   try {
-    const { username, question } = req.body || {};
-    if (!username || !question) {
+    const { username, question, topic_id } = req.body || {};
+    if (!username || !question || !topic_id) {
       console.log('username or question text missing');
       return res.status(400).json({ error: 'username and question body required' });
     }
 
     console.log("asking question with username ", username, " and question text ", question);
 
-    const result = await addQuestion(question, username);
+    const result = await addQuestion(question, username, topic_id);
     console.log('Ask question succesful');
     return res.status(201).json(result);
   } catch (e) {

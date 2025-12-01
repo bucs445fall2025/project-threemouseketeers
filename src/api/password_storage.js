@@ -161,10 +161,17 @@ async function verifyAccountEmail(uid){
 	);
 }
 
+async function deleteUser(id) {
+  await pool.execute(
+    'DELETE FROM users WHERE id = ?', 
+    [id]
+  );
+} 
+
 //this is a testing suite, we should not be hard coding our functions with test variables
 
 async function test(){
 
 }
 
-module.exports = { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail, createEmailToken, consumeEmailToken, verifyAccountEmail}; 
+module.exports = { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail, createEmailToken, consumeEmailToken, verifyAccountEmail, deleteUser}; 

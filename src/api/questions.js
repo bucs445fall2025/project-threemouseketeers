@@ -18,20 +18,25 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
-async function addQuestion(newQuestion, username) {
+async function addQuestion(newQuestion, username, topicId) {
 	//ensure field is not blank
 	if(!newQuestion) {
 		const err = new Error('Question field is empty.')
 		err.status = 400;
 		throw err;
 	}
+  if (!topicId) {
+		const err = new Error('Topic is required.');
+		err.status = 400;
+		throw err;
+	}
 	
 	const [result] = await pool.execute(
-		'INSERT INTO questions (question, username) VALUES (?, ?)',
-		[newQuestion, username]
+		'INSERT INTO questions (question, username, topic_id) VALUES (?, ?, ?)',
+		[newQuestion, username, topicId]
 	);
 	
-	return {id: result.insertId, newQuestion, username}
+	return {id: result.insertId, newQuestion, username, topicId}
 }
 
 async function vote(answerId) {
@@ -110,7 +115,7 @@ async function getAllQuestions(numRows) {
     numRows = count[0].questionsCount;
   }
 
-  // Get all questions and their answers
+  // Get all questions, their topics, and answers
   const [rows] = await pool.execute(`
     SELECT 
       q.id AS question_id,
@@ -120,12 +125,15 @@ async function getAllQuestions(numRows) {
       q.num_answers,
       q.accepted_answer_id,
       q.created_at,
+      t.id AS topic_id,
+      t.name AS topic_name,
       a.id AS answer_id,
       a.answer,
       a.username AS answer_user,
       a.votes AS answer_votes,
       a.accepted_answer
     FROM questions q
+    LEFT JOIN topics t ON q.topic_id = t.id
     LEFT JOIN answers a ON q.id = a.question_id
     ORDER BY q.created_at DESC
   `);
@@ -143,6 +151,7 @@ async function getAllQuestions(numRows) {
         num_answers: row.num_answers,
         accepted_answer_id: row.accepted_answer_id,
         created_at: row.created_at,
+        topic: row.topic_id ? { id: row.topic_id, name: row.topic_name } : null,
         answers: []
       });
     }
@@ -163,8 +172,9 @@ async function getAllQuestions(numRows) {
     ...q,
     answers: Array.isArray(q.answers) ? q.answers : Object.values(q.answers || {})
   }));
-
 }
+
+
 
 async function searchQuestions(query) {
   if (!query) {
@@ -183,12 +193,15 @@ async function searchQuestions(query) {
       q.num_answers,
       q.accepted_answer_id,
       q.created_at,
+      t.id AS topic_id,
+      t.name AS topic_name,
       a.id AS answer_id,
       a.answer,
       a.username AS answer_user,
       a.votes AS answer_votes,
       a.accepted_answer
     FROM questions q
+    LEFT JOIN topics t ON q.topic_id = t.id
     LEFT JOIN answers a ON q.id = a.question_id
     WHERE MATCH(q.question) AGAINST(? IN NATURAL LANGUAGE MODE)
     ORDER BY q.votes DESC, a.votes DESC
@@ -207,6 +220,7 @@ async function searchQuestions(query) {
         num_answers: row.num_answers,
         accepted_answer_id: row.accepted_answer_id,
         created_at: row.created_at,
+        topic: row.topic_id ? { id: row.topic_id, name: row.topic_name } : null,
         answers: []
       });
     }
@@ -236,4 +250,4 @@ module.exports = { addQuestion,
                    answerQuestion, 
                    topQuestions, 
                    getAllQuestions, 
-                   searchQuestions };
+                   searchQuestions, };
