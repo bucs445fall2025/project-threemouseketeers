@@ -46,6 +46,7 @@ async function usernameTaken(username){
  * @returns the hash
  */
 function hashWord(password) {
+  let saltRounds = 10;
 	return bcrypt.hash(password, Number(saltRounds));
 }
 
@@ -63,9 +64,12 @@ function hashWord(password) {
  * @throws 409 if the username is already taken.
  */
 async function createUser({username, email, password}) {
+  console.log("Made it here 1")
 	//verify uniqueness first
 	const trimmed = typeof username === 'string' ? username.trim() : ''; //handles any type of non-valid username
 	username = trimmed;
+
+  console.log("Made it here 2")
 
 	if(!username){
 		username = generateUsername("",2);
@@ -73,20 +77,28 @@ async function createUser({username, email, password}) {
 			username = generateUsername("", 2);
 		}
 	}
+
+  console.log("Made it here 3")
 	if( await usernameTaken(username)) {  //stops account creation if username is taken
 		const err = new Error('username has been taken');
 		err.status = 409;
 		throw err;		
 	}
 
-
+  console.log("Made it here 4")
+  console.log("username = ", username, " email = ", email,  " password = ", password);
 	//hash the password and insert into users table
 	// const hash = await bcrypt.hash(password, Number(saltRounds));
 	const hash = await hashWord(password); // hashword returns a promise, need to await it
+  console.log("after hashWord")
+  console.log("hash = ", hash, " username = ", username, " email = ", email);
+
 	const [result] = await pool.execute(
 	    'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
     	[username, email, hash]
   	);
+
+  console.log("Made it here 5")
 
 	return {id: result.insertId, username, email};
 
@@ -148,7 +160,7 @@ async function fetchUsername(email){ //this might create some security issues
  */
 async function fetchUserbyUID(uid){
 	const [rows] = await pool.execute(
-		'SELECT id, username, email, bio FROM `users` WHERE id = ?',
+		'SELECT id, username, email, bio, verified FROM `users` WHERE id = ?',
 		[uid]
 	);
 	const row = rows[0];
@@ -166,7 +178,7 @@ async function fetchUserbyUID(uid){
  */
 async function fetchUserbyEmail(email){
 	const [rows] = await pool.execute(
-	'SELECT id, username, email, bio FROM `users` WHERE email = ?',
+	'SELECT id, username, email, bio, verified FROM `users` WHERE email = ?',
 	[email]
 	);
 	const row = rows[0];
@@ -250,6 +262,9 @@ async function verifyAccountEmail(uid){
  * @returns void
  */
 async function deleteUser(id) {
+  await pool.execute(
+    'DELETE FROM email_tokens WHERE user_id = ?', 
+    [id]);
   await pool.execute(
     'DELETE FROM users WHERE id = ?', 
     [id]

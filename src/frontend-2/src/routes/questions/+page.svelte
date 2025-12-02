@@ -5,7 +5,7 @@
 
   export let data;
 
-  const user = data.user;
+  let user = data.user;
 
   const topics = [
   { id: 1, name: "campus" },
@@ -333,9 +333,14 @@
             </form>
           </div>
         {/if}
-        <button class="submit-btn" on:click={() => {showAnswerModal = true; activeQuestionId = q.id;}}>
-          Answer
-        </button>
+        <div class="tooltip-wrapper">
+          <button class="submit-btn" disabled={!user?.verified} on:click={() => {showAnswerModal = true; activeQuestionId = q.id;}}>
+            Answer
+          </button>
+          {#if !user?.verified}
+            <div class="tooltip">Please verify your account to answer</div>
+          {/if}
+        </div>
       {/if}
     </div>
   {/each}

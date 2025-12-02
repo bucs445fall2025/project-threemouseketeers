@@ -3,7 +3,7 @@
   export let form = {};
 
   export let data;
-  const user = data.user;
+  let user = data.user;
 
   let showDeleteModal = false;
   let deleting = false;
@@ -45,6 +45,33 @@
     }
   }
 
+  let resendMessage = '';
+  let resendError = '';
+
+  async function resendEmail() {
+    resendMessage = '';
+    resendError = '';
+
+    try {
+      const res = await fetch('/api/verify-email', {
+        method: 'POST',
+        credentials: 'include' // ensures cookies (session) are sent
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        resendMessage = 'Verification email sent! Check your inbox.';
+      } else {
+        resendError = data.error || 'Something went wrong.';
+      }
+    } catch (e) {
+      resendError = 'Failed to send request.';
+      console.error(e);
+    }
+  }
+
+
 </script>
 
 {#if data.user}
@@ -68,13 +95,17 @@
       {/if}
     </form>
 
-    {#if data.user.verified === 0}
-      <form method="POST">
-        <button type="submit" class="verify-btn" formaction="?/verify">Verify Email</button>
-      </form>
-    {/if}
-
     <div class="account-actions">
+      {#if !user?.verified}
+        Your account is not verified, please visit your email for the verification link. 
+
+        Didn't get an email? 
+        <button on:click={resendEmail}>
+          Resend Email
+        </button>
+      {/if}
+      {#if resendMessage}<p class="success">{resendMessage}</p>{/if}
+      {#if resendError}<p class="error">{resendError}</p>{/if}
       <form method="POST">
         <button type="submit" class="logout-btn" formaction="?/logout">Log Out</button>
       </form>
@@ -154,16 +185,16 @@
 
   /* Specific buttons */
   .logout-btn {
-    background: #e53e3e;
+    background: #3182ce;
     color: white;
   }
   .logout-btn:hover {
-    background: #c53030;
+    background: #2b6cb0;
   }
 
   .delete-btn {
-    background: #f6adad;
-    color: #721c24;
+    background: #db3939;
+    color: white;
   }
   .delete-btn:hover {
     background: #f56565;

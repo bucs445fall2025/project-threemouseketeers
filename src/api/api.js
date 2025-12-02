@@ -74,6 +74,9 @@ app.post('/api/signup', async (req, res) => {
 
     const user = await fetchUserbyEmail(email);  //gets the userDTO so we can hydrate user info later
     uid = user.id;
+
+    console.log("uid = ", uid);
+
     //username and email already provided
     try { //verify email immediately after account signup
       const token = await createEmailToken(uid);
