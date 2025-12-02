@@ -22,6 +22,9 @@
 
   let showSearchModal = false;
 
+  let showAnswerModal = false;
+  let activeQuestionId = null;
+
   let questions = data.questions;
 
   /**
@@ -307,20 +310,32 @@
       {/if}
 
       {#if data.user}
-        <form method="POST" class="answer-form-large">
-          <input name="username" type="hidden" value={user.username}/>
-          <input name="questionID" type="hidden" value={q.id} />
+        {#if showAnswerModal}
+          <div class="modal-backdrop" on:click={() => showAnswerModal = false}></div>
+          <div class="modal">
+            <form method="POST" class="answer-form-large">
+              <input name="username" type="hidden" value={user.username}/>
+              <input name="questionID" type="hidden" value={activeQuestionId} />
 
-          <label class="answer-label">
-            Submit an answer:
-            <textarea name="answer" placeholder="Type your answer..." required></textarea>
-          </label>
+              <label class="answer-label">
+                <h2 style="color:darkgreen;">Submit an answer</h2>
+                <textarea name="answer" placeholder="Type your answer..." required></textarea>
+              </label>
 
-          <button type="submit" formaction="?/answerQuestion" class="small-btn">Answer</button>
+              
+              <div class="buttons">
+                <button type="button" on:click={() => showAnswerModal = false} class="cancel-btn">Cancel</button>
+                <button type="submit" formaction="?/answerQuestion" class="small-btn">Answer</button>
+              </div>
 
-          {#if form?.missing}<p class="error">Please fill in all fields.</p>{/if}
-          {#if form?.apiError}<p class="error">{form.apiError}</p>{/if}
-        </form>
+              {#if form?.missing}<p class="error">Please fill in all fields.</p>{/if}
+              {#if form?.apiError}<p class="error">{form.apiError}</p>{/if}
+            </form>
+          </div>
+        {/if}
+        <button class="submit-btn" on:click={() => {showAnswerModal = true; activeQuestionId = q.id;}}>
+          Answer
+        </button>
       {/if}
     </div>
   {/each}
