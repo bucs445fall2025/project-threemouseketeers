@@ -73,7 +73,25 @@ app.post('/api/signup', async (req, res) => {
     console.log('account create succesful');
 
     const user = await fetchUserbyEmail(email);  //gets the userDTO so we can hydrate user info later
-    
+    uid = user.id;
+    //username and email already provided
+    try { //verify email immediately after account signup
+      const token = await createEmailToken(uid);
+
+      const link = `http://localhost:5173/api/verify-email?token=${token}`
+
+      sendAccountEmail({
+        address: email,
+        link: link,
+      });
+      
+      // return res.json({ ok: true });
+
+    }
+    catch (e){
+      console.error('verify-email error', e);
+      // return res.status(500).json({ error: 'Could not send verification email' });
+    }
     //create/rotate server session from express-mysql-backend
     req.session.regenerate(err => {
       if(err) {
