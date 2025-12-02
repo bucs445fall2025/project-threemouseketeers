@@ -1,8 +1,8 @@
-<h1>Welcome to VisitU</h1>
-
 <div class="main-home">
+<h1 style="text-align: center;">Welcome to VisitU</h1>
+
 <p class="home-text">
-  Welcome to VisitU, the forum where prospective students get real, unfiltered answers straight from current university students. Every registered user is verified with a valid <code>.edu</code> email, ensuring you hear from genuine students. Ask questions, share answers, vote on the most helpful responses, and explore topics or search by keywords to get the insights you need to make informed decisions about your future.
+  Welcome to VisitU, the forum where prospective students get real, unfiltered answers straight from current university students. Every registered user is verified with a valid .edu email, ensuring you hear from genuine students. Ask questions, share answers, vote on the most helpful responses, and explore topics or search by keywords to get the insights you need to make informed decisions about your future.
 </p>
 
 <p class="home-text">
@@ -19,7 +19,7 @@
     border-radius: 12px;
     background-color: #f9f9f9;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-
+    align-items: center;
   }
   .home-text {
     font-size: 1.1rem;
