@@ -11,18 +11,19 @@ const { UserDTO } = require('./user_dto');
 
 const cors = require('cors');
 
+const PORT = Number(process.env.PORT || 8080);
+const API_KEY = process.env.API_KEY || null;
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecret'; // TODO: Fix these
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+
 const app = express();
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: `${FRONTEND_ORIGIN}`,
   credentials: true
 }));
 app.use(express.json());
 app.use(sessionMiddleware());
 app.set('etag', false);
-
-const PORT = Number(process.env.PORT || 8080);
-const API_KEY = process.env.API_KEY || null;
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecret'; // TODO: Fix these
 
 
 // simple API key gate
@@ -81,7 +82,7 @@ app.post('/api/signup', async (req, res) => {
     try { //verify email immediately after account signup
       const token = await createEmailToken(uid);
 
-      const link = `http://localhost:5173/api/verify-email?token=${token}`
+      const link = `${FRONTEND_ORIGIN}/api/verify-email?token=${token}`
 
       sendAccountEmail({
         address: email,
@@ -254,7 +255,7 @@ app.post('/api/verify-email', async (req, res) =>{
 
     const token = await createEmailToken(uid);
 
-    const link = `http://localhost:5173/api/verify-email?token=${token}`
+    const link = `${FRONTEND_ORIGIN}/api/verify-email?token=${token}`
 
     await sendAccountEmail({
       address: email,
@@ -300,7 +301,7 @@ app.get('/api/verify-email', async (req, res) => {
     verifyAccountEmail(uid);
 
     console.log(`account ${uid} verified!`);
-    return res.redirect(`http://localhost:5173/profile`)
+    return res.redirect(`${FRONTEND_ORIGIN}/profile`)
     // return res.json({ ok: true });
 
   } catch (e) {
