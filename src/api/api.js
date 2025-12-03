@@ -301,7 +301,7 @@ app.get('/api/verify-email', async (req, res) => {
     verifyAccountEmail(uid);
 
     console.log(`account ${uid} verified!`);
-    return res.redirect(`${FRONTEND_ORIGIN}/profile`)
+    return res.redirect(`${FRONTEND_ORIGIN}/verified`)
     // return res.json({ ok: true });
 
   } catch (e) {
