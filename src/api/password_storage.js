@@ -86,12 +86,12 @@ async function createUser({username, email, password}) {
 	}
 
   console.log("Made it here 4")
-  console.log("username = ", username, " email = ", email,  " password = ", password);
+//   console.log("username = ", username, " email = ", email,  " password = ", password);
 	//hash the password and insert into users table
 	// const hash = await bcrypt.hash(password, Number(saltRounds));
 	const hash = await hashWord(password); // hashword returns a promise, need to await it
   console.log("after hashWord")
-  console.log("hash = ", hash, " username = ", username, " email = ", email);
+//   console.log("hash = ", hash, " username = ", username, " email = ", email);
 
 	const [result] = await pool.execute(
 	    'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
