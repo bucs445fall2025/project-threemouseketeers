@@ -300,7 +300,7 @@ app.get('/api/verify-email', async (req, res) => {
     verifyAccountEmail(uid);
 
     console.log(`account ${uid} verified!`);
-    return res.redirect(`http://localhost:5173/profile`)
+    return res.redirect(`http://localhost:5173/verified`)
     // return res.json({ ok: true });
 
   } catch (e) {
