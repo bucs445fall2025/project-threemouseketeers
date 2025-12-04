@@ -1,0 +1,530 @@
+// src/api/api.js
+require('dotenv').config();
+const express = require('express');
+
+const { createUser, usernameTaken, verifyUser, dbPing, hashWord, fetchUsername, fetchUserbyUID, fetchUserbyEmail, createEmailToken, consumeEmailToken, verifyAccountEmail, deleteUser } = require('./password_storage.js');
+const { addQuestion, vote, answerQuestion, topQuestions, getAllQuestions, searchQuestions, getQuestionsByTopic } = require('./questions.js');
+const { getBio, setBio } = require('./user_bio.js');
+const { sessionMiddleware, requireAuth, getSessionUser, setSessionUser, destroySession} = require('./session.js');
+const { sendAccountEmail, xorEncrypt } = require('./mail.js');
+const { UserDTO } = require('./user_dto');
+
+const cors = require('cors');
+
+const PORT = Number(process.env.PORT || 8080);
+const API_KEY = process.env.API_KEY || null;
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecret'; // TODO: Fix these
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+
+const app = express();
+app.use(cors({
+  origin: `${FRONTEND_ORIGIN}`,
+  credentials: true
+}));
+app.use(express.json());
+app.use(sessionMiddleware());
+app.set('etag', false);
+
+
+// simple API key gate
+app.use((req, res, next) => {
+  if (!API_KEY) return next();
+  if (req.header('x-api-key') === API_KEY) return next();
+  return res.status(401).json({ error: 'Unauthorized' });
+});
+
+/**
+ * @brief Health check endpoint.
+ *
+ * Performs a ping to the database to ensure backend connectivity.
+ *
+ * @route GET /health
+ * @returns 200 OK if the backend is healthy.
+ * @returns 500 Internal Server Error if the database cannot be reached.
+ */
+app.get('/health', async (_req, res) => {
+  try {
+    await dbPing(); //pings database, returns 500 if can't connect to backend
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+/**
+ * @brief Creates a new user account in the database and logs the user in.
+ *
+ * Validates required fields, creates a user record, regenerates the session,
+ * and stores the user ID in the session.
+ *
+ * @route POST /api/signup
+ * @returns 200 OK after successful signup and session creation.
+ * @returns 400 Bad Request if required fields are missing.
+ * @returns 500 Internal Server Error on database or session errors.
+ */
+app.post('/api/signup', async (req, res) => { 
+  console.log('account create requested');
+  try {
+    const { username, email, password } = req.body || {};
+    if (!email || !password) {
+      console.log('email or password missing');
+      return res.status(400).json({ error: 'username, email, password required' });
+    }
+    const result = await createUser({ username, email, password });
+    console.log('account create succesful');
+
+    const user = await fetchUserbyEmail(email);  //gets the userDTO so we can hydrate user info later
+    uid = user.id;
+
+    console.log("uid = ", uid);
+
+    //username and email already provided
+    try { //verify email immediately after account signup
+      const token = await createEmailToken(uid);
+
+      const link = `${FRONTEND_ORIGIN}/api/verify-email?token=${token}`
+
+      sendAccountEmail({
+        address: email,
+        link: link,
+      });
+      
+      // return res.json({ ok: true });
+
+    }
+    catch (e){
+      console.error('verify-email error', e);
+      // return res.status(500).json({ error: 'Could not send verification email' });
+    }
+    //create/rotate server session from express-mysql-backend
+    req.session.regenerate(err => {
+      if(err) {
+        console.error('session regen failed', err);
+        return res.status(500).json({ error : 'Session error, whoops'});
+      }
+
+      // store minimal, non-sensitive info on the new session
+      setSessionUser(req, user.id);
+      // ensure the store writes the session before responding
+      req.session.save(saveErr => {
+        if (saveErr) {
+          console.error('session save failed', saveErr);
+          return res.status(500).json({ error: 'Session save error' });
+        }
+        console.log('signup + login successful');
+        return res.json({ ok: true });
+      });
+    });
+  } catch (e) {
+    console.log('account create failed');
+    return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
+  }
+});
+
+/**
+ * @brief Authenticates a user and creates a new session.
+ *
+ * Verifies the email/password pair, regenerates the session,
+ * and stores the user ID in the session.
+ *
+ * @route POST /api/login
+ * @body JSON { email, password }
+ * @returns 200 OK on successful login.
+ * @returns 400 Bad Request if required fields are missing.
+ * @returns 401 Unauthorized if credentials are invalid.
+ * @returns 500 Internal Server Error on server or session failures.
+ */
+app.post('/api/login', async (req, res) => {
+  console.log('login requested');
+  try {
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ error: 'email and password required' });
+    }
+    const ok = await verifyUser({ email, password });
+    if (!ok) {
+      return res.status(401).json({ ok: false, error: 'Invalid credentials' });
+    }
+    const user = await fetchUserbyEmail(email);  //gets the userDTO so we can hydrate user info later
+
+    //create/rotate server session from express-mysql-backend
+    req.session.regenerate(err => {
+      if(err) {
+        console.error('session regen failed', err);
+        return res.status(500).json({ error : 'Session error, whoops'});
+      }
+
+      // store minimal, non-sensitive info on the new session
+      setSessionUser(req, user.id);
+      // ensure the store writes the session before responding
+      req.session.save(saveErr => {
+        if (saveErr) {
+          console.error('session save failed', saveErr);
+          return res.status(500).json({ error: 'Session save error' });
+        }
+        console.log('login successful');
+        return res.json({ ok: true });
+      });
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Internal error, whoops' });
+  }
+});
+
+/**
+ * @brief Retrieves a user's bio information.
+ *
+ * Fetches profile text associated with a given username.
+ *
+ * @route POST /api/fetchbio
+ * @body JSON { username }
+ * @returns 201 Created with bio data.
+ * @returns 400 Bad Request if username is missing.
+ * @returns 500 Internal Server Error on database failure.
+ */
+app.post('/api/fetchbio', async (req, res) =>{
+  console.log('get bio requested');
+  try {
+    const { username } = req.body || {};
+    if (!username) {
+      console.log('username missing');
+      return res.status(400).json({ error: 'username required' });
+    }
+    const result = await getBio({ username });
+    console.log('get bio succesful');
+    return res.status(201).json(result);
+  } catch (e) {
+    console.log('get bio failed');
+    return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
+  }
+});
+
+/**
+ * @brief Updates a user's bio.
+ *
+ * Writes new profile information for the specified username.
+ *
+ * @route POST /api/updatebio
+ * @returns 201 Created with update results.
+ * @returns 400 Bad Request if required fields are missing.
+ * @returns 500 Internal Server Error on update failure.
+ */
+app.post('/api/updatebio', async (req, res) =>{
+  console.log('update bio requested');
+  try {
+    const { username, newBio } = req.body || {};
+    if (!username || !newBio) {
+      console.log('username or new bio missing');
+      return res.status(400).json({ error: 'username and new bio required' });
+    }
+    const result = await setBio({ username, newBio });
+    console.log('update bio succesful');
+    return res.status(201).json(result);
+  } catch (e) {
+    console.log('update bio failed');
+    return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
+  }
+});
+
+/**
+ * @brief Initiates the email verification process.
+ *
+ * Requires the user to be logged in. Generates a verification token,
+ * creates a link, and sends it to the user’s email.
+ *
+ * @route POST /api/verify-email
+ * @returns 200 OK if the email was sent.
+ * @returns 401 Unauthorized if not logged in.
+ * @returns 500 Internal Server Error if token creation or mail sending fails.
+ */
+app.post('/api/verify-email', async (req, res) =>{
+  console.log('verify email called');
+  //first, ensure user is signed in
+  const uid = getSessionUser(req);
+  console.log(`uid is ${uid}`);
+  if(!uid){
+    return res.status(401).json({ error: 'Not logged in' });
+  };
+  //then, get the current users email address
+  const user = await fetchUserbyUID(uid);
+  email = user.email
+  username = user.username
+
+  try {
+
+    const token = await createEmailToken(uid);
+
+    const link = `${FRONTEND_ORIGIN}/api/verify-email?token=${token}`
+
+    await sendAccountEmail({
+      address: email,
+      link: link,
+    });
+    
+    return res.json({ ok: true });
+  }
+  catch (e){
+    console.error('verify-email error', e);
+    return res.status(500).json({ error: 'Could not send verification email' });
+  }
+});
+
+/**
+ * @brief Confirms a user's email verification by consuming a token.
+ *
+ * Marks the associated user account as verified.
+ *
+ * @route GET /api/verify-email?token=...
+ * @returns 302 Redirect to `/profile` on success.
+ * @returns 400 Bad Request if token is missing or invalid.
+ * @returns 500 Internal Server Error on verification failure.
+ */
+app.get('/api/verify-email', async (req, res) => {
+  const { token } = req.query;
+  if (!token) {
+    return res.status(400).json({ error: 'Missing token' });
+  }
+
+  try {
+    const uid = await consumeEmailToken(token);
+    if (!uid) {
+      return res.status(400).json({ error: 'Invalid or expired token' });
+    }
+
+    // mark user as verified
+    // await db.query(
+    //   'UPDATE users SET email_verified = 1 WHERE id = ?',
+    //   [userId]
+    // ); 
+    //we do this in password_storage now
+    verifyAccountEmail(uid);
+
+    console.log(`account ${uid} verified!`);
+    return res.redirect(`${FRONTEND_ORIGIN}/verified`)
+    // return res.json({ ok: true });
+
+  } catch (e) {
+    console.error('confirm verify-email error', e);
+    return res.status(500).json({ error: 'Internal error' });
+  }
+});
+
+/**
+ * @brief Returns the currently authenticated user's profile.
+ *
+ * Fetches user data using the session user ID.
+ *
+ * @route GET /api/me
+ * @auth Required
+ * @returns 200 OK with `{ ok: true, user }`.
+ * @returns 401 Unauthorized if not logged in.
+ * @returns 404 Not Found if user cannot be retrieved.
+ */
+app.get('/api/me', async (req, res) => {
+  console.log(`api/me called`)
+  const uid = getSessionUser(req);
+  if(!uid){
+    return res.status(401).json({ error: 'Not logged in' })
+  };
+  const user = await fetchUserbyUID(uid);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  
+  //disable caching for identity cookies
+  res.set('Cache-Control', 'no-store');
+  res.set('Vary', 'Cookie');
+
+  res.json({ ok:true, user});
+});
+
+/**
+ * @brief Logs out the current user and destroys the session.
+ *
+ * Clears the session and removes the session cookie.
+ *
+ * @route POST /api/logout
+ * @returns 200 OK with `{ ok: true }`.
+ */
+app.post('/api/logout', async (req, res) => {
+  console.log("api/logout called")
+  await destroySession(req);
+
+  res.clearCookie(process.env.SESSION_COOKIE_NAME || 'sid');
+  res.json({ ok: true});
+});
+
+/**
+ * @brief Deletes the currently authenticated user’s account.
+ *
+ * Removes the user from the database, then destroys the session.
+ *
+ * @route DELETE /api/deleteaccount
+ * @returns 200 OK with success message.
+ * @returns 401 Unauthorized if not logged in.
+ * @returns 500 Internal Server Error on deletion failure.
+ */
+app.delete('/api/deleteaccount', requireAuth, async (req, res) => {
+  try {
+    const userId = getSessionUser(req);
+    if (!userId) {
+      return res.status(401).json({ error: 'Not logged in' });
+    }
+
+    await deleteUser(userId);
+
+    // Destroy session to log them out
+    await destroySession(req);
+
+    return res.status(200).json({ success: true, message: 'Account deleted and logged out' });
+  } catch (err) {
+    console.error('Error deleting account:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * @brief Returns private user data for authenticated users.
+ *
+ * Example protected route demonstrating session-based auth.
+ *
+ * @route GET /api/private/data
+ * @returns 200 OK with greeting and user object.
+ */
+app.get('/api/private/data', requireAuth, async (req, res) => {
+  const uid = getSessionUser(req);
+  const user = await fetchUserbyUID(uid);
+  res.json({ message: `welcome, ${user?.username || 'user'}!`, user});
+});
+
+/**
+ * @brief Fetches all questions.
+ *
+ * Retrieves the full question list from the database.
+ *
+ * @route GET /api/allquestions
+ * @returns 200 OK with `{ ok: true, allQuestionsResult }`.
+ */
+app.get('/api/allquestions', async (req, res) => {
+  console.log("Get all questions requested from API");
+
+  const allQuestionsResult = await getAllQuestions(1);
+
+  res.json({ ok: true, allQuestionsResult});
+});
+
+/**
+ * @brief Adds a new question to the system.
+ *
+ * @route POST /api/askquestion
+ * @returns 201 Created with database insert result.
+ * @returns 400 Bad Request if any required field is missing.
+ * @returns 500 Internal Server Error on failure.
+ */
+app.post('/api/askquestion', async (req, res) => {
+  console.log("Ask a question requested of API");
+
+  try {
+    const { username, question, topic_id } = req.body || {};
+    if (!username || !question || !topic_id) {
+      console.log('username or question text missing');
+      return res.status(400).json({ error: 'username and question body required' });
+    }
+
+    console.log("asking question with username ", username, " and question text ", question);
+
+    const result = await addQuestion(question, username, topic_id);
+    console.log('Ask question succesful');
+    return res.status(201).json(result);
+  } catch (e) {
+    console.log('ask question failed');
+    return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
+  }
+})
+
+/**
+ * @brief Submits an answer for a question.
+ *
+ * @route POST /api/answerquestion
+ * @returns 201 Created with insert result.
+ * @returns 400 Bad Request if required fields are missing.
+ * @returns 500 Internal Server Error on failure.
+ */
+app.post('/api/answerquestion', async (req, res) => {
+  console.log("Answer question requested of API");
+
+  try {
+    const { username, questionID, answer } = req.body || {};
+    if (!username || !questionID || !answer) {
+      console.log('username or question ID or answer text missing');
+      return res.status(400).json({ error: 'username and question ID and answer text required' });
+    }
+
+    const result = await answerQuestion(questionID, answer, username);
+    console.log('Answer question succesful');
+    return res.status(201).json(result);
+  } catch (e) {
+    console.log('answer question failed');
+    return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
+  }
+})
+
+/**
+ * @brief Casts an upvote for an answer.
+ *
+ * @route POST /api/voteanswer
+ * @returns 201 Created with vote update result.
+ * @returns 400 Bad Request if answerId is missing.
+ * @returns 500 Internal Server Error on failure.
+ */
+app.post('/api/voteanswer', async (req, res) => {
+  try {
+    const { answerId } = req.body || {};
+    if (!answerId) {
+      console.log('answer ID missing');
+      return res.status(400).json({ error: 'answer ID required' });
+    }
+
+    const result = await vote(answerId);
+    console.log('Vote for answer succesful');
+    return res.status(201).json(result);
+  } catch (e) {
+     console.log('vote for answer failed');
+    return res.status(e.status || 500).json({ error: e.message || 'Internal error, whoops' });
+  }
+})
+
+/**
+ * @brief Searches questions by full-text query.
+ *
+ * Returns matching questions based on the supplied query string.
+ *
+ * @route POST /api/searchquestions
+ * @returns 200 OK if successful.
+ * @returns 400 Bad Request if query is missing.
+ * @returns 500 Internal Server Error on failure.
+ */
+app.post('/api/searchquestions', async (req, res) => {
+  console.log("Search questions requested");
+
+  try {
+    const { query } = req.body || {};
+    if (!query) {
+      console.log("search query missing");
+      return res.status(400).json({ error: "Search query required" });
+    }
+
+    const results = await searchQuestions(query);
+    console.log("Search successful");
+
+    return res.status(200).json({ ok: true, results });
+
+  } catch (e) {
+    console.log("Search failed:", e);
+    return res.status(500).json({ error: e.message || "Internal error" });
+  }
+});
+
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Bridge listening on :${PORT}`);
+});

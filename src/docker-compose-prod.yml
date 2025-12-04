@@ -1,0 +1,86 @@
+services:
+  db:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      start_period: 5s
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  frontend:
+    build:
+      context: ./frontend-2
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "127.0.0.1:4173:3000" 
+    depends_on:
+      - api
+    environment:
+      - NODE_ENV=production
+      - API_URL=http://api:8080   # Set up api route for frontend calls
+      - FRONTEND_ORIGIN=https://visitu.seniho.com
+    command: npm run start 
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: api
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME}
+      FRONTEND_ORIGIN: https://visitu.seniho.com
+    ports:
+      - "127.0.0.1:4174:8080"    
+
+  adminer: #the adminer service is jsut a GUI representation of our database. note the depends-on flag, it will not start until the database has started
+    container_name: adminer
+    image: dockette/adminer:mysql
+    ports:
+      - "0.0.0.0:3001:80"
+    depends_on: 
+      - db
+
+  tests:
+    container_name: db_test
+    image: mysql:latest
+    depends_on:  
+      db:
+        condition: service_healthy
+    volumes:
+      - ./server:/server
+    # working_dir: /server
+    env_file:
+      - ./.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command: ["bash", "./server/basic_test.sh"]
