@@ -9,3 +9,4 @@
 
 ## **Additional Dependencies**
 - Svelte (frontend). It is a node package, so npm install will install it for you.
+- Additionally, all of the node packages specified in each `package.json`

@@ -87,12 +87,12 @@
   - David: None
   - Senih: Proficient
 - Apache
-  - John: 
-  - David: 
+  - John: None
+  - David: None
   - Senih: Proficient
 - Nginx
-  - John: 
-  - David: 
+  - John: None
+  - David: None
   - Senih: None
 
 Add more if needed
