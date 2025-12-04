@@ -25,17 +25,14 @@ services:
       dockerfile: Dockerfile
     container_name: frontend
     ports:
-      - "5173:5173"  # SvelteKit dev server port
+      - "127.0.0.1:4173:3000" 
     depends_on:
       - api
-    volumes:
-      - ./frontend-2:/app         # Mount source code for hot reload
-      - /app/node_modules         # Prevent host node_modules from overwriting container deps
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - API_URL=http://api:8080   # Set up api route for frontend calls
-      - FRONTEND_ORIGIN=http://localhost:5173
-    command: npm run dev -- --host
+      - FRONTEND_ORIGIN=https://visitu.seniho.com
+    command: npm run start 
 
   api:
     build:
@@ -56,13 +53,15 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
       SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME}
-      FRONTEND_ORIGIN: http://localhost:5173
+      FRONTEND_ORIGIN: https://visitu.seniho.com
+    ports:
+      - "127.0.0.1:4174:8080"    
 
   adminer: #the adminer service is jsut a GUI representation of our database. note the depends-on flag, it will not start until the database has started
     container_name: adminer
     image: dockette/adminer:mysql
     ports:
-      - "3001:80"
+      - "0.0.0.0:3001:80"
     depends_on: 
       - db
 

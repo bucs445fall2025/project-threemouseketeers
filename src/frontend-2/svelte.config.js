@@ -1,4 +1,5 @@
 import adapter from '@sveltejs/adapter-node';
+import { sveltekit } from '@sveltejs/kit/vite';
 
 export default {
   kit: {
@@ -6,6 +7,7 @@ export default {
       pages: 'build',
       assets: 'build',
       fallback: 'index.html'
-    }),
-  }
+    })
+  },
+  plugins: [sveltekit()]
 };
